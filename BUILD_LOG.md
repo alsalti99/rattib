@@ -57,6 +57,8 @@ The team brought one concept: Rattib Untangle (the brief was sent with `/build`)
 
 - [20:47] team request → **video autoplay**: browsers only allow muted autoplay, so the site's preview video now plays muted and loops while on screen, and pauses off screen (IntersectionObserver). A visitor's own pause is respected, the controls can unmute it, and there's no autoplay under reduced motion. README: GitHub can't autoplay video, so the team's video became an optimised looping GIF (640 px, 10 fps, 128 colours, 3.4 MB) that links to the full video with sound. The screenshot under it was removed as clutter, and the now-unused images were deleted.
 
+- [20:48] team clarification → the preview video belongs on **GitHub only**: removed the video section, its CSS, strings, autoplay code and poster image from the website. The README keeps the looping GIF preview, which links to the full video file with sound.
+
 ### Parser test (rule-based, today = Tue 6 Oct 2026 12:45)
 | # | Input (messy) | Result | Pass |
 |---|---|---|---|

@@ -441,11 +441,6 @@ section { padding-block: var(--gap-section); }
 .city-picker.field .cp-pop { width: 100%; min-width: min(300px, calc(100vw - 32px)); }
 .set-city { display: grid; gap: 6px; margin-bottom: 10px; }
 .set-city-k { font-size: .875rem; font-weight: 600; }
-/* Preview video */
-.demo-video { margin: 0 0 28px; padding: 12px; }
-.demo-video video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; background: #EEF1F9; }
-.demo-video figcaption { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; padding: 14px 8px 4px; color: var(--slate); }
-.demo-video figcaption strong { color: var(--ink); font-size: 1.0625rem; }
 .pt-today { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
 .pt-today .note { width: 100%; margin: 0; }
 .pt-today .tag b { color: var(--violet-text); font-weight: 700; }
@@ -835,12 +830,6 @@ footer { padding-bottom: 40px; }
         <h2 id="how-title" data-i18n="how.title">Plain rules, no magic, nothing uploaded</h2>
         <p data-i18n="how.sub">Rattib is a rule-based tool that runs entirely in your browser. It is not an AI model, so every result below can be explained.</p>
       </div>
-      <figure class="demo-video hcard">
-        <video controls muted loop playsinline preload="metadata" poster="assets/preview-poster.jpg" aria-labelledby="vid-title">
-          <source src="assets/preview.mp4" type="video/mp4">
-        </video>
-        <figcaption><strong id="vid-title" data-i18n="vid.title">Rattib in 30 seconds</strong><span data-i18n="vid.cap">Paste the chaos, untangle it, and see which deadline is really at risk.</span></figcaption>
-      </figure>
       <div class="how-card hcard">
         <div class="tabs underline" role="tablist" aria-label="How it works" id="how-tabs">
           <button type="button" class="tab" role="tab" id="htab-parser" aria-controls="hpanel-parser" aria-selected="true" data-tab="parser" data-i18n="how.t1">Parser</button>
@@ -989,7 +978,7 @@ const I18N = {
     'knot.untangle': 'Untangle into my week', 'knot.tangle': 'Tangle again', 'knot.see': 'See the week',
     'kl.thick': 'thicker = more hours', 'kl.bead': 'bead = risk', 'kl.glow': 'coral glow = most at risk',
     'wk.prev': 'Earlier', 'wk.now': 'This week', 'wk.next': 'Later', 'wk.replan': 'Re-plan', 'wk.copy': 'Copy my week',
-    'wk.note': "Striped = class (sample timetable) · lilac = prayer time ±15 min (Ministry of Awqaf times for your city) · click a block to see why it's there.", 'cp.label': 'Prayer times', 'cp.search': 'Search 86 cities', 'cp.none': 'No city matches. Try another spelling.', 'cp.source': 'Ministry of Awqaf and Religious Affairs', 'vid.title': 'Rattib in 30 seconds', 'vid.cap': 'Paste the chaos, untangle it, and see which deadline is really at risk.',
+    'wk.note': "Striped = class (sample timetable) · lilac = prayer time ±15 min (Ministry of Awqaf times for your city) · click a block to see why it's there.", 'cp.label': 'Prayer times', 'cp.search': 'Search 86 cities', 'cp.none': 'No city matches. Try another spelling.', 'cp.source': 'Ministry of Awqaf and Religious Affairs',
     'wk.free': 'No study blocks: free day', 'wk.today': 'today', 'wk.weekend': 'weekend',
     'set.title': 'Your week setup: classes, prayer times, sleep and study cap', 'set.study': 'Study rhythm', 'set.cap': 'Daily study cap (h)', 'set.wcap': 'Weekend-day cap (h)',
     'set.buf': 'Finish early by (h)', 'set.wake': 'Wake up', 'set.sleep': 'Sleep', 'set.weekend': 'Weekend days', 'set.prayer': 'Prayer times',
@@ -1087,7 +1076,7 @@ const I18N = {
     'knot.untangle': 'فكّ العقدة إلى أسبوعي', 'knot.tangle': 'أعد التشابك', 'knot.see': 'اعرض الأسبوع',
     'kl.thick': 'أسمك = ساعات أكثر', 'kl.bead': 'الخرزة = مستوى الخطر', 'kl.glow': 'التوهج المرجاني = الأكثر خطرًا',
     'wk.prev': 'السابق', 'wk.now': 'هذا الأسبوع', 'wk.next': 'التالي', 'wk.replan': 'أعد التخطيط', 'wk.copy': 'انسخ أسبوعي',
-    'cp.label': 'أوقات الصلاة', 'cp.search': 'ابحث في 86 مدينة', 'cp.none': 'لا توجد مدينة مطابقة. جرّب كتابة أخرى.', 'cp.source': 'وزارة الأوقاف والشؤون الدينية', 'vid.title': 'رتّب في 30 ثانية', 'vid.cap': 'الصق الفوضى، فكّ تشابكها، واعرف أي موعد تسليم في خطر فعلًا.', 'wk.note': 'المخطّط = محاضرة (جدول تجريبي) · البنفسجي = وقت الصلاة ±15 دقيقة (حسب تقويم وزارة الأوقاف لمدينتك) · اضغط على أي فترة لتعرف سبب وضعها.',
+    'cp.label': 'أوقات الصلاة', 'cp.search': 'ابحث في 86 مدينة', 'cp.none': 'لا توجد مدينة مطابقة. جرّب كتابة أخرى.', 'cp.source': 'وزارة الأوقاف والشؤون الدينية', 'wk.note': 'المخطّط = محاضرة (جدول تجريبي) · البنفسجي = وقت الصلاة ±15 دقيقة (حسب تقويم وزارة الأوقاف لمدينتك) · اضغط على أي فترة لتعرف سبب وضعها.',
     'wk.free': 'لا توجد فترات مذاكرة: يوم حر', 'wk.today': 'اليوم', 'wk.weekend': 'عطلة',
     'set.title': 'إعداد أسبوعك: المحاضرات وأوقات الصلاة والنوم وحد المذاكرة', 'set.study': 'إيقاع المذاكرة', 'set.cap': 'حد المذاكرة اليومي (ساعة)', 'set.wcap': 'حد يوم العطلة (ساعة)',
     'set.buf': 'أنهِ قبل الموعد بـ (ساعة)', 'set.wake': 'الاستيقاظ', 'set.sleep': 'النوم', 'set.weekend': 'أيام العطلة', 'set.prayer': 'أوقات الصلاة',
@@ -2727,21 +2716,6 @@ function syncSoundLabel() { $$('[data-sound-toggle]').forEach(b => b.setAttribut
 /* ==============================================================
    4 Motion (guarded): spotlight cards
    ============================================================== */
-// Preview video: browsers only allow muted autoplay, so it plays muted while on screen and pauses off screen.
-// If the visitor pauses it, it stays paused. The controls let them unmute. Reduced motion: no autoplay.
-function initDemoVideo() {
-  const v = $('.demo-video video');
-  if (!v || reduceMotion) return;
-  v.muted = true;
-  let auto = true;
-  let ours = false; // true while the pause comes from us, not the visitor
-  v.addEventListener('pause', () => { if (!ours) auto = false; ours = false; });
-  v.addEventListener('play', () => { auto = true; });
-  new IntersectionObserver(([e]) => {
-    if (e.isIntersecting && auto && v.paused) v.play().catch(() => {});
-    else if (!e.isIntersecting && !v.paused) { ours = true; v.pause(); }
-  }, { threshold: 0.35 }).observe(v);
-}
 function initSpotlight() {
   if (reduceMotion || !matchMedia('(hover: hover)').matches) return;
   document.addEventListener('pointermove', e => {
@@ -2968,7 +2942,6 @@ function init() {
   $('#add-class').addEventListener('click', () => { state.settings.classes.push({ day: 0, start: '10:00', end: '11:15', name: '' }); renderSetup(); const rows = $$('#class-rows .cls-row'); const last = rows[rows.length - 1]; if (last) last.querySelector('input').focus(); scheduleRender(); });
 
   initSpotlight();
-  initDemoVideo();
   initGate();
   // Keep "now" fresh: re-plan every 5 minutes so past slots drop off
   setInterval(() => { if (!document.hidden && !Hero.isPlaying() && !state.editing) renderAll(); }, 5 * 60000);

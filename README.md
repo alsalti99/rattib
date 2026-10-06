@@ -2,6 +2,8 @@
 
 # Rattib · رتّب
 
+<img src="assets/logo.svg" alt="Rattib logo" width="112">
+
 ### Paste the chaos. Untangle your week.
 
 **A bilingual (English + العربية) deadline untangler for college students in Oman.**
@@ -13,6 +15,10 @@ Paste your WhatsApp group chat, Moodle notices and lecturer emails, and get back
 ![No build step](https://img.shields.io/badge/build%20step-none-7A55F5)
 ![English + Arabic](https://img.shields.io/badge/language-English%20%2B%20%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-6BC8FF)
 ![Privacy](https://img.shields.io/badge/data-stays%20on%20your%20device-0B7F72)
+
+<a href="https://rattib-om.netlify.app/assets/preview.mp4"><img src="assets/video-thumb.jpg" alt="Watch the 30-second Rattib preview video" width="820"></a>
+
+**▶ Watch the 30-second preview**
 
 <img src="assets/preview.jpg" alt="Rattib hero: the paste box on the left and the untangled Sunday–Thursday loom on the right" width="820">
 

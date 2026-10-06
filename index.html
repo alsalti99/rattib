@@ -399,8 +399,53 @@ section { padding-block: var(--gap-section); }
 .block-detail li { margin-bottom: 4px; }
 .week-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 .wk-note { font-size: .8125rem; color: var(--slate); margin-top: 10px; }
-.city-pick { display: inline-flex; align-items: center; gap: 8px; font-size: .8125rem; font-weight: 600; color: var(--slate); }
-.city-pick select { width: auto; min-height: 36px; padding: 4px 10px; border-radius: 12px; font-weight: 600; color: var(--ink); }
+/* City picker: Halo-style pill button + searchable listbox */
+.city-picker { position: relative; display: inline-block; }
+.cp-btn { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px 0 6px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--white); box-shadow: var(--shadow-btn); font-size: .875rem; font-weight: 600; color: var(--ink); transition: border-color .2s ease, box-shadow .2s ease; }
+.cp-btn:hover { border-color: rgba(43,89,255,.45); }
+.city-picker.is-open .cp-btn { border-color: transparent; background: linear-gradient(#fff, #fff) padding-box, var(--grad) border-box; box-shadow: 0 0 0 4px rgba(43,89,255,.12); }
+.cp-pin { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--grad); color: #fff; flex: none; box-shadow: 0 4px 10px -3px rgba(43,89,255,.55); }
+.cp-pin svg { width: 15px; height: 15px; }
+.cp-k { color: var(--slate); }
+.cp-v { font-family: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif; letter-spacing: 0; font-weight: 700; color: var(--ink); }
+.cp-chev { width: 16px; height: 16px; color: var(--slate); flex: none; transition: transform .25s ease; }
+.city-picker.is-open .cp-chev { transform: rotate(180deg); }
+.cp-pop { position: absolute; z-index: 40; top: calc(100% + 8px); inset-inline-start: 0; width: min(340px, calc(100vw - 32px)); padding: 10px; border-radius: 20px; border: 1.5px solid transparent;
+  background: linear-gradient(#fff, #fff) padding-box, linear-gradient(135deg, rgba(43,89,255,.6), rgba(122,85,245,.6)) border-box;
+  box-shadow: 0 24px 48px -16px rgba(15,19,48,.3), var(--shadow-card); transform-origin: top center; animation: cp-in .22s cubic-bezier(.2,.9,.25,1); }
+.cp-pop.flip { inset-inline-start: auto; inset-inline-end: 0; }
+@keyframes cp-in { from { opacity: 0; transform: translateY(-6px) scale(.98); } }
+.cp-search { display: flex; align-items: center; gap: 8px; padding: 0 12px; border-radius: 14px; background: var(--mist); border: 1px solid var(--line); transition: border-color .2s, box-shadow .2s; }
+.cp-search:focus-within { border-color: rgba(43,89,255,.55); box-shadow: 0 0 0 3px rgba(43,89,255,.12); background: #fff; }
+.cp-search svg { width: 16px; height: 16px; color: var(--slate); flex: none; }
+.cp-search input { flex: 1; min-width: 0; min-height: 42px; border: 0; background: none; padding: 0; font-size: .9375rem; outline: none; }
+.cp-search input:focus-visible { outline: none; }
+.cp-search input::-webkit-search-cancel-button { cursor: pointer; }
+.cp-list { list-style: none; margin: 8px 0 0; padding: 0; max-height: 300px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #CBD2E4 transparent; }
+.cp-list li[data-city] { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 10px; padding: 8px 12px 8px 16px; border-radius: 12px; cursor: pointer; transition: background .15s ease; }
+.cp-name { font-family: 'IBM Plex Sans Arabic', 'Segoe UI', sans-serif; letter-spacing: 0; font-weight: 600; font-size: .9375rem; color: var(--ink); }
+.cp-times { grid-column: 1; font-size: .75rem; color: var(--slate); }
+.cp-check { grid-column: 2; grid-row: 1 / span 2; width: 18px; height: 18px; color: var(--blue); }
+.cp-list li.is-active { background: rgba(43,89,255,.07); }
+.cp-list li[aria-selected="true"] { background: linear-gradient(90deg, rgba(43,89,255,.11), rgba(122,85,245,.08)); }
+[dir="rtl"] .cp-list li[aria-selected="true"] { background: linear-gradient(270deg, rgba(43,89,255,.11), rgba(122,85,245,.08)); }
+.cp-list li[aria-selected="true"]::before { content: ''; position: absolute; inset-inline-start: 5px; top: 9px; bottom: 9px; width: 3px; border-radius: 3px; background: var(--grad); }
+.cp-list li[aria-selected="true"] .cp-name { color: #1F43C7; }
+.cp-empty { padding: 20px 12px; text-align: center; color: var(--slate); font-size: .875rem; }
+.cp-foot { display: flex; align-items: center; gap: 6px; margin: 8px 6px 2px; font-size: .6875rem; color: var(--slate); }
+.cp-foot::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--grad); flex: none; }
+.city-picker.field { display: block; }
+.city-picker.field .cp-btn { width: 100%; min-height: 46px; border-radius: 16px; }
+.city-picker.field .cp-k { display: none; }
+.city-picker.field .cp-chev { margin-inline-start: auto; }
+.city-picker.field .cp-pop { width: 100%; min-width: min(300px, calc(100vw - 32px)); }
+.set-city { display: grid; gap: 6px; margin-bottom: 10px; }
+.set-city-k { font-size: .875rem; font-weight: 600; }
+/* Preview video */
+.demo-video { margin: 0 0 28px; padding: 12px; }
+.demo-video video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; background: #EEF1F9; }
+.demo-video figcaption { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; padding: 14px 8px 4px; color: var(--slate); }
+.demo-video figcaption strong { color: var(--ink); font-size: 1.0625rem; }
 .pt-today { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
 .pt-today .note { width: 100%; margin: 0; }
 .pt-today .tag b { color: var(--violet-text); font-weight: 700; }
@@ -713,7 +758,7 @@ footer { padding-bottom: 40px; }
           <div class="tabpanel hcard" role="tabpanel" id="panel-week" aria-labelledby="tab-week" tabindex="0" hidden>
             <div class="week-top">
               <h4 id="week-range"></h4>
-              <label class="city-pick"><span data-i18n="wk.city">Prayer times for</span><select id="wk-city" class="city-select"></select></label>
+              <div class="city-picker" data-city-picker id="wk-city"></div>
               <div class="btn-row">
                 <button type="button" class="ghost-btn sm" id="wk-prev" data-sfx="tick" data-i18n="wk.prev">Earlier</button>
                 <button type="button" class="ghost-btn sm" id="wk-now" data-sfx="tick" data-i18n="wk.now">This week</button>
@@ -762,7 +807,7 @@ footer { padding-bottom: 40px; }
           <fieldset>
             <legend data-i18n="set.prayer">Prayer times</legend>
             <p class="note" data-i18n="set.prayerNote">Daily times from the Ministry of Awqaf and Religious Affairs calendar (mara.gov.om). Pick your city.</p>
-            <div class="set-row"><label for="s-city" data-i18n="set.city">City</label><select id="s-city" class="city-select"></select></div>
+            <div class="set-city"><span class="set-city-k" data-i18n="set.city">City</span><div class="city-picker field" data-city-picker id="s-city"></div></div>
             <div id="prayer-rows" class="pt-today" aria-live="polite"></div>
             <div class="set-row"><label for="s-pbuf" data-i18n="set.pbuf">Keep free before and after (min)</label><input id="s-pbuf" type="number" min="0" max="60" step="5" data-set="prayerBuffer"></div>
           </fieldset>
@@ -790,6 +835,12 @@ footer { padding-bottom: 40px; }
         <h2 id="how-title" data-i18n="how.title">Plain rules, no magic, nothing uploaded</h2>
         <p data-i18n="how.sub">Rattib is a rule-based tool that runs entirely in your browser. It is not an AI model, so every result below can be explained.</p>
       </div>
+      <figure class="demo-video hcard">
+        <video controls preload="metadata" playsinline poster="assets/preview-poster.jpg" aria-labelledby="vid-title">
+          <source src="assets/preview.mp4" type="video/mp4">
+        </video>
+        <figcaption><strong id="vid-title" data-i18n="vid.title">Rattib in 30 seconds</strong><span data-i18n="vid.cap">Paste the chaos, untangle it, and see which deadline is really at risk.</span></figcaption>
+      </figure>
       <div class="how-card hcard">
         <div class="tabs underline" role="tablist" aria-label="How it works" id="how-tabs">
           <button type="button" class="tab" role="tab" id="htab-parser" aria-controls="hpanel-parser" aria-selected="true" data-tab="parser" data-i18n="how.t1">Parser</button>
@@ -938,7 +989,7 @@ const I18N = {
     'knot.untangle': 'Untangle into my week', 'knot.tangle': 'Tangle again', 'knot.see': 'See the week',
     'kl.thick': 'thicker = more hours', 'kl.bead': 'bead = risk', 'kl.glow': 'coral glow = most at risk',
     'wk.prev': 'Earlier', 'wk.now': 'This week', 'wk.next': 'Later', 'wk.replan': 'Re-plan', 'wk.copy': 'Copy my week',
-    'wk.note': "Striped = class (sample timetable) · lilac = prayer time ±15 min (Ministry of Awqaf times for your city) · click a block to see why it's there.", 'wk.city': 'Prayer times for',
+    'wk.note': "Striped = class (sample timetable) · lilac = prayer time ±15 min (Ministry of Awqaf times for your city) · click a block to see why it's there.", 'cp.label': 'Prayer times', 'cp.search': 'Search 86 cities', 'cp.none': 'No city matches. Try another spelling.', 'cp.source': 'Ministry of Awqaf and Religious Affairs', 'vid.title': 'Rattib in 30 seconds', 'vid.cap': 'Paste the chaos, untangle it, and see which deadline is really at risk.',
     'wk.free': 'No study blocks: free day', 'wk.today': 'today', 'wk.weekend': 'weekend',
     'set.title': 'Your week setup: classes, prayer times, sleep and study cap', 'set.study': 'Study rhythm', 'set.cap': 'Daily study cap (h)', 'set.wcap': 'Weekend-day cap (h)',
     'set.buf': 'Finish early by (h)', 'set.wake': 'Wake up', 'set.sleep': 'Sleep', 'set.weekend': 'Weekend days', 'set.prayer': 'Prayer times',
@@ -1036,7 +1087,7 @@ const I18N = {
     'knot.untangle': 'فكّ العقدة إلى أسبوعي', 'knot.tangle': 'أعد التشابك', 'knot.see': 'اعرض الأسبوع',
     'kl.thick': 'أسمك = ساعات أكثر', 'kl.bead': 'الخرزة = مستوى الخطر', 'kl.glow': 'التوهج المرجاني = الأكثر خطرًا',
     'wk.prev': 'السابق', 'wk.now': 'هذا الأسبوع', 'wk.next': 'التالي', 'wk.replan': 'أعد التخطيط', 'wk.copy': 'انسخ أسبوعي',
-    'wk.city': 'أوقات الصلاة في', 'wk.note': 'المخطّط = محاضرة (جدول تجريبي) · البنفسجي = وقت الصلاة ±15 دقيقة (حسب تقويم وزارة الأوقاف لمدينتك) · اضغط على أي فترة لتعرف سبب وضعها.',
+    'cp.label': 'أوقات الصلاة', 'cp.search': 'ابحث في 86 مدينة', 'cp.none': 'لا توجد مدينة مطابقة. جرّب كتابة أخرى.', 'cp.source': 'وزارة الأوقاف والشؤون الدينية', 'vid.title': 'رتّب في 30 ثانية', 'vid.cap': 'الصق الفوضى، فكّ تشابكها، واعرف أي موعد تسليم في خطر فعلًا.', 'wk.note': 'المخطّط = محاضرة (جدول تجريبي) · البنفسجي = وقت الصلاة ±15 دقيقة (حسب تقويم وزارة الأوقاف لمدينتك) · اضغط على أي فترة لتعرف سبب وضعها.',
     'wk.free': 'لا توجد فترات مذاكرة: يوم حر', 'wk.today': 'اليوم', 'wk.weekend': 'عطلة',
     'set.title': 'إعداد أسبوعك: المحاضرات وأوقات الصلاة والنوم وحد المذاكرة', 'set.study': 'إيقاع المذاكرة', 'set.cap': 'حد المذاكرة اليومي (ساعة)', 'set.wcap': 'حد يوم العطلة (ساعة)',
     'set.buf': 'أنهِ قبل الموعد بـ (ساعة)', 'set.wake': 'الاستيقاظ', 'set.sleep': 'النوم', 'set.weekend': 'أيام العطلة', 'set.prayer': 'أوقات الصلاة',
@@ -2516,7 +2567,7 @@ function renderSetup() {
   const S = state.settings;
   $$('[data-set]').forEach(inp => { inp.value = S[inp.dataset.set]; });
   $('#weekend-pick').innerHTML = [0, 1, 2, 3, 4, 5, 6].map(d => `<label><input type="checkbox" data-weekend="${d}" ${S.weekend.includes(d) ? 'checked' : ''}>${esc(DAY_SHORT[state.lang][d])}</label>`).join('');
-  fillCitySelects();
+  CityPicker.sync();
   renderPrayerToday();
   $('#effort-rows').innerHTML = TYPES.map(ty => `<div class="set-row"><label for="ef-${ty}">${esc(t('type.' + ty))}</label><input id="ef-${ty}" type="number" min="0.5" max="80" step="0.5" data-effort="${ty}" value="${S.effort[ty]}"></div>`).join('');
   $('#class-rows').innerHTML = S.classes.map((c, i) => `<div class="cls-row">
@@ -2527,13 +2578,100 @@ function renderSetup() {
     <button type="button" class="icon-btn" data-cls-del="${i}" aria-label="${esc(t('set.remove'))}: ${esc(c.name)}">${ICONS.trash}</button></div>`).join('');
 }
 const CITY_KEY = KEY + '-city'; // remembered on purpose: survives Reset, like the sound choice
-function fillCitySelects() {
-  const id = num(state.settings.prayerCity, 0);
-  $$('.city-select').forEach(sel => {
-    if (!sel.options.length) sel.innerHTML = Prayer.cities.map(([cid, name]) => `<option value="${cid}" lang="ar">${esc(name)}</option>`).join('');
-    sel.value = String(id);
-  });
-}
+// English search names for the Ministry's Arabic city list (search only; the list shows the Ministry's names)
+const CITY_EN = { 0: 'Muscat', 1: 'Ibra', 2: 'Adam', 3: 'Izki', 4: 'Ashkharah', 5: 'Buraimi', 6: 'Jazer', 7: 'Jumma', 8: 'Hashman', 9: 'Hallaniyat', 10: 'Hamra', 11: 'Khaburah', 12: 'Khadhrafi', 13: 'Khuwair', 14: 'Duqm', 15: 'Rustaq', 16: 'Awabi', 17: 'Qabil Sharqiyah', 18: 'Qabil Dhahirah', 19: 'Kamil Wafi', 20: 'Mudhaibi', 21: 'Mamurah', 22: 'Huwaisah', 23: 'Wasit', 24: 'Wasil', 25: 'Bukha', 26: 'Bidbid', 27: 'Bidiyah', 28: 'Barka', 29: 'Bahla', 30: 'Thumrait', 31: 'Jaddat al Harasis', 32: 'Jalan Bani Bu Hassan', 33: 'Jalan Bani Bu Ali', 34: 'Habarut', 35: 'Hijj', 36: 'Khazzan', 37: 'Dibba', 38: 'Ras al Hadd', 39: 'Ras Madrakah', 40: 'Rakhyut', 41: 'Wahiba Sands', 42: 'Raysut', 43: 'Sadah', 44: 'Samail', 45: 'Samad al Shan', 46: 'Sinaw', 47: 'Suwaiq', 48: 'Sayh al Rawl', 49: 'Saiq', 50: 'Shalim', 51: 'Shinas', 52: 'Sohar', 53: 'Saham', 54: 'Sarab', 55: 'Sarfait', 56: 'Salalah', 57: 'Sur', 58: 'Dank', 59: 'Taqah', 60: 'Dhalkut', 61: 'Ibri', 62: 'Fahud', 63: 'Qarn Alam', 64: 'Quriyat', 65: 'Kanhat', 66: 'Liwa', 67: 'Mahdah', 68: 'Mahout', 69: 'Madha', 70: 'Mirbat', 71: 'Marmur', 72: 'Marmul', 73: 'Musandam', 74: 'Musannah', 75: 'Masirah', 76: 'Muqshin', 77: 'Manah', 78: 'Nakhal', 79: 'Nizwa', 80: 'Nimr', 81: 'Harweel', 82: 'Haima', 83: 'Wadi Bani Khalid', 84: 'Wadi Hibi', 85: 'Yanqul' };
+// Loose matching: lower-case, no harakat, one alef form, ة→ه, ى→ي, and no leading "ال"
+const normCity = v => String(v || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f\u064B-\u065F\u0670]/g, '')
+  .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/(^|\s)ال/g, '$1').replace(/\b(al|el)[\s-]/g, '').replace(/[\s'-]+/g, ' ').trim();
+
+const CityPicker = (() => {
+  const ICON = {
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+    chev: '<svg class="cp-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+    check: '<svg class="cp-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>'
+  };
+  const pickers = [];
+  function mount(host) {
+    const id = host.id || ('cp' + pickers.length);
+    host.innerHTML = `<button type="button" class="cp-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="${id}-pop"><span class="cp-pin">${ICON.pin}</span><span class="cp-k"></span><span class="cp-v" lang="ar"></span>${ICON.chev}</button>
+      <div class="cp-pop" id="${id}-pop" hidden>
+        <div class="cp-search">${ICON.search}<input type="search" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="${id}-list" autocomplete="off" spellcheck="false"></div>
+        <ul class="cp-list" role="listbox" id="${id}-list"></ul>
+        <p class="cp-foot"></p>
+      </div>`;
+    const p = { host, id, btn: host.querySelector('.cp-btn'), pop: host.querySelector('.cp-pop'), input: host.querySelector('input'), list: host.querySelector('.cp-list'), items: [], active: -1, outside: null };
+    p.btn.addEventListener('click', () => (p.pop.hidden ? open(p) : close(p)));
+    p.btn.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(p); } });
+    p.input.addEventListener('input', () => { renderList(p); Sound.play('tick'); });
+    p.input.addEventListener('keydown', e => onKey(p, e));
+    p.list.addEventListener('click', e => { const li = e.target instanceof Element && e.target.closest('[data-city]'); if (li) choose(p, li.dataset.city); });
+    p.list.addEventListener('pointermove', e => { const li = e.target instanceof Element && e.target.closest('[data-city]'); if (li) setActive(p, p.items.indexOf(li), false); });
+    pickers.push(p);
+    sync();
+  }
+  function renderList(p) {
+    const q = normCity(p.input.value), cur = num(state.settings.prayerCity, 0), now = Date.now();
+    const list = Prayer.cities.filter(([cid, name]) => !q || normCity(name).includes(q) || normCity(CITY_EN[cid]).includes(q));
+    p.list.innerHTML = list.length ? list.map(([cid, name]) => {
+      const pt = Prayer.times(now, cid);
+      return `<li role="option" id="${p.id}-o${cid}" data-city="${cid}" aria-selected="${cid === cur}"><span class="cp-name" lang="ar">${esc(name)}</span><span class="cp-times">${esc(t('prayer.fajr'))} ${Prayer.label(pt.fajr)} · ${esc(t('prayer.maghrib'))} ${Prayer.label(pt.maghrib)}</span>${cid === cur ? ICON.check : ''}</li>`;
+    }).join('') : `<li class="cp-empty" role="presentation">${esc(t('cp.none'))}</li>`;
+    p.items = [...p.list.querySelectorAll('[data-city]')];
+    const sel = p.items.findIndex(li => li.getAttribute('aria-selected') === 'true');
+    setActive(p, q ? 0 : Math.max(0, sel), true);
+  }
+  function setActive(p, i, scroll) {
+    if (!p.items.length) { p.active = -1; p.input.removeAttribute('aria-activedescendant'); return; }
+    p.active = Math.max(0, Math.min(p.items.length - 1, i));
+    p.items.forEach((li, j) => li.classList.toggle('is-active', j === p.active));
+    p.input.setAttribute('aria-activedescendant', p.items[p.active].id);
+    if (scroll) p.items[p.active].scrollIntoView({ block: 'nearest' });
+  }
+  function onKey(p, e) {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(p, p.active + 1, true); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(p, p.active - 1, true); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (p.items[p.active]) choose(p, p.items[p.active].dataset.city); }
+    else if (e.key === 'Escape') { e.preventDefault(); close(p, true); }
+    else if (e.key === 'Tab') close(p);
+  }
+  function open(p) {
+    pickers.forEach(o => { if (o !== p) close(o); });
+    p.pop.hidden = false; p.btn.setAttribute('aria-expanded', 'true'); p.host.classList.add('is-open');
+    p.input.value = ''; renderList(p);
+    p.pop.classList.remove('flip');
+    const r = p.pop.getBoundingClientRect();
+    if (r.right > innerWidth - 8 || r.left < 8) p.pop.classList.add('flip');
+    p.input.focus({ preventScroll: true });
+    Sound.play('open');
+    p.outside = e => { if (!p.host.contains(e.target)) close(p); };
+    setTimeout(() => document.addEventListener('pointerdown', p.outside), 0);
+  }
+  function close(p, refocus) {
+    if (p.pop.hidden) return;
+    p.pop.hidden = true; p.btn.setAttribute('aria-expanded', 'false'); p.host.classList.remove('is-open');
+    if (p.outside) document.removeEventListener('pointerdown', p.outside);
+    if (refocus) p.btn.focus();
+  }
+  function choose(p, cid) {
+    close(p, true);
+    if (Number(cid) !== num(state.settings.prayerCity, 0)) setCity(cid);
+  }
+  // Refresh every picker's labels (city change, language change)
+  function sync() {
+    const cur = num(state.settings.prayerCity, 0);
+    pickers.forEach(p => {
+      p.host.querySelector('.cp-k').textContent = t('cp.label');
+      p.host.querySelector('.cp-v').textContent = Prayer.name(cur);
+      p.btn.setAttribute('aria-label', `${t('cp.label')}: ${Prayer.name(cur)}`);
+      p.input.placeholder = t('cp.search'); p.input.setAttribute('aria-label', t('cp.search'));
+      p.list.setAttribute('aria-label', t('cp.label'));
+      p.host.querySelector('.cp-foot').textContent = t('cp.source');
+      if (!p.pop.hidden) renderList(p);
+    });
+  }
+  return { mount, sync };
+})();
 function renderPrayerToday() {
   const box = $('#prayer-rows'); if (!box) return;
   const pt = Prayer.times(Date.now(), num(state.settings.prayerCity, 0));
@@ -2544,14 +2682,14 @@ function setCity(id) {
   if (!Prayer.has(id)) return;
   state.settings.prayerCity = Number(id);
   store.set(CITY_KEY, Number(id));
-  fillCitySelects(); renderPrayerToday();
+  CityPicker.sync(); renderPrayerToday();
   Sound.play('tick');
   scheduleRender();
   toast(t('toast.city', { c: Prayer.name(id) }), t('toast.cityS'));
 }
 function readSetup(e) {
   const S = state.settings, el = e.target;
-  if (el.classList.contains('city-select')) return; // handled by setCity()
+  if (el.closest('.city-picker')) return; // the city picker handles itself (setCity)
   if (el.dataset.set) {
     const k = el.dataset.set;
     if (['cap', 'weekendCap', 'buffer', 'prayerBuffer'].includes(k)) { const v = num(el.value, NaN); if (!Number.isFinite(v)) return; S[k] = Math.max(0, Math.min(k === 'buffer' ? 48 : k === 'prayerBuffer' ? 60 : 14, v)); }
@@ -2635,7 +2773,7 @@ function init() {
   if (!had || !state.tasks.length && !store.get(KEY + '-touched', false)) seed();
   $('#chaos').value = state.heroText;
   { const c = store.get(CITY_KEY, 0); state.settings.prayerCity = Prayer.has(c) ? Number(c) : 0; }
-  document.addEventListener('change', e => { if (e.target instanceof Element && e.target.classList.contains('city-select')) setCity(e.target.value); });
+  $$('[data-city-picker]').forEach(host => CityPicker.mount(host));
 
   Sound.init({ levels: { sfx: 0.55 } });
   Sound.onChange(syncSoundLabel);

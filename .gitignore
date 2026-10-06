@@ -1,0 +1,6 @@
+# Local only: never published
+.claude/
+serve.py
+PITCH.md
+desktop.ini
+Thumbs.db

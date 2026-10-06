@@ -399,6 +399,11 @@ section { padding-block: var(--gap-section); }
 .block-detail li { margin-bottom: 4px; }
 .week-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
 .wk-note { font-size: .8125rem; color: var(--slate); margin-top: 10px; }
+.city-pick { display: inline-flex; align-items: center; gap: 8px; font-size: .8125rem; font-weight: 600; color: var(--slate); }
+.city-pick select { width: auto; min-height: 36px; padding: 4px 10px; border-radius: 12px; font-weight: 600; color: var(--ink); }
+.pt-today { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.pt-today .note { width: 100%; margin: 0; }
+.pt-today .tag b { color: var(--violet-text); font-weight: 700; }
 
 /* Panic check */
 .panic-sum { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: center; }
@@ -708,6 +713,7 @@ footer { padding-bottom: 40px; }
           <div class="tabpanel hcard" role="tabpanel" id="panel-week" aria-labelledby="tab-week" tabindex="0" hidden>
             <div class="week-top">
               <h4 id="week-range"></h4>
+              <label class="city-pick"><span data-i18n="wk.city">Prayer times for</span><select id="wk-city" class="city-select"></select></label>
               <div class="btn-row">
                 <button type="button" class="ghost-btn sm" id="wk-prev" data-sfx="tick" data-i18n="wk.prev">Earlier</button>
                 <button type="button" class="ghost-btn sm" id="wk-now" data-sfx="tick" data-i18n="wk.now">This week</button>
@@ -715,7 +721,7 @@ footer { padding-bottom: 40px; }
               </div>
             </div>
             <div class="wk-scroll" id="wk-scroll"><div class="wk" id="wk"></div></div>
-            <p class="wk-note" data-i18n="wk.note">Striped = class (sample timetable) · lilac = prayer time ±15 min (approximate Muscat times) · click a block to see why it's there.</p>
+            <p class="wk-note" data-i18n="wk.note">Striped = class (sample timetable) · lilac = prayer time ±15 min (Ministry of Awqaf times for your city) · click a block to see why it's there.</p>
             <div class="block-detail hcard" id="block-detail" hidden tabindex="-1" aria-live="polite"></div>
             <div class="week-actions">
               <button type="button" class="halo-btn sm" id="replan"><span class="hb-label" data-i18n="wk.replan">Re-plan</span></button>
@@ -755,8 +761,9 @@ footer { padding-bottom: 40px; }
           </fieldset>
           <fieldset>
             <legend data-i18n="set.prayer">Prayer times</legend>
-            <p class="note" data-i18n="set.prayerNote">Approximate Muscat times for early October, not an official timetable. Edit them to match your mosque.</p>
-            <div id="prayer-rows"></div>
+            <p class="note" data-i18n="set.prayerNote">Daily times from the Ministry of Awqaf and Religious Affairs calendar (mara.gov.om). Pick your city.</p>
+            <div class="set-row"><label for="s-city" data-i18n="set.city">City</label><select id="s-city" class="city-select"></select></div>
+            <div id="prayer-rows" class="pt-today" aria-live="polite"></div>
             <div class="set-row"><label for="s-pbuf" data-i18n="set.pbuf">Keep free before and after (min)</label><input id="s-pbuf" type="number" min="0" max="60" step="5" data-set="prayerBuffer"></div>
           </fieldset>
           <fieldset>
@@ -845,7 +852,7 @@ footer { padding-bottom: 40px; }
   <div class="wrap foot">
     <div>
       <p class="made" data-i18n="foot.made">Built by AlSalt Al-Salti and Omar Al-Salti with Claude Code</p>
-      <p data-i18n="foot.note">Sample deadlines and timetable are labelled as samples. Prayer times are approximate, so check your local timetable. Hours are estimates, not promises.</p>
+      <p data-i18n="foot.note">Sample deadlines and timetable are labelled as samples. Prayer times come from the Ministry of Awqaf and Religious Affairs calendar. Hours are estimates, not promises.</p>
     </div>
     <a class="ghost-btn sm" href="#top" data-i18n="foot.top">Back to top</a>
   </div>
@@ -878,7 +885,7 @@ const PRAYERS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const DEFAULT_SETTINGS = {
   cap: 6, weekendCap: 2, buffer: 4, wake: '07:00', sleep: '23:30', weekend: [5, 6],
   prayerBuffer: 15,
-  prayers: { fajr: '04:47', dhuhr: '11:56', asr: '15:18', maghrib: '17:49', isha: '19:03' }, // approximate Muscat, early October
+  prayerCity: 0, // Ministry of Awqaf city id: 0 = Muscat (default); the visitor's pick is remembered separately
   effort: { quiz: 2, lab: 3, assignment: 3, report: 4, presentation: 4, essay: 6, midterm: 6, exam: 8, project: 10, other: 2 },
   classes: [ // sample timetable
     { day: 0, start: '08:00', end: '09:15', name: 'Calculus' },
@@ -892,6 +899,11 @@ const DEFAULT_SETTINGS = {
     { day: 3, start: '13:00', end: '14:15', name: 'Management' }
   ]
 };
+// Prayer times from the Ministry of Awqaf and Religious Affairs calendar (mara.gov.om), saved 6 Oct 2026.
+// muscat: one row per day from `start` (minutes after midnight: fajr, dhuhr, asr, maghrib, isha).
+// offsets: every other city's minutes relative to Muscat on each sample day (every ~15 days); the days in
+// between are interpolated (checked against the Ministry site: within 1 minute). cities: [id, name] as listed there.
+const PRAYER_DATA = {"start":"2026-10-01","muscat":[[283,722,926,1080,1150],[284,721,925,1079,1149],[284,721,925,1078,1148],[285,721,924,1077,1147],[285,720,923,1076,1146],[285,720,923,1075,1145],[286,720,922,1074,1144],[286,720,922,1073,1143],[286,719,921,1072,1142],[287,719,921,1071,1141],[287,719,920,1070,1140],[288,718,919,1069,1139],[288,718,919,1068,1139],[288,718,918,1067,1138],[289,718,918,1067,1137],[289,718,917,1066,1136],[289,717,917,1065,1135],[290,717,916,1064,1134],[290,717,916,1063,1134],[291,717,915,1062,1133],[291,717,914,1062,1132],[291,716,914,1061,1131],[292,716,913,1060,1131],[292,716,913,1059,1130],[293,716,912,1058,1129],[293,716,912,1058,1129],[294,716,911,1057,1128],[294,716,911,1056,1127],[294,716,911,1056,1127],[295,716,910,1055,1126],[295,716,910,1054,1126],[296,715,909,1054,1125],[296,715,909,1053,1125],[297,715,908,1052,1124],[297,715,908,1052,1124],[298,715,908,1051,1123],[298,715,907,1051,1123],[299,716,907,1050,1122],[299,716,907,1050,1122],[300,716,906,1049,1122],[300,716,906,1049,1121],[301,716,906,1048,1121],[301,716,905,1048,1121],[302,716,905,1048,1120],[302,716,905,1047,1120],[303,716,905,1047,1120],[303,717,905,1046,1120],[304,717,904,1046,1119],[305,717,904,1046,1119],[305,717,904,1046,1119],[306,717,904,1045,1119],[306,718,904,1045,1119],[307,718,904,1045,1119],[307,718,904,1045,1119],[308,718,904,1045,1119],[309,719,904,1045,1119],[309,719,904,1045,1119],[310,719,904,1045,1119],[310,720,904,1044,1119],[311,720,904,1044,1119],[312,720,904,1044,1119],[312,721,904,1045,1119],[313,721,904,1045,1119],[313,721,904,1045,1120],[314,722,904,1045,1120],[315,722,905,1045,1120],[315,723,905,1045,1120],[316,723,905,1045,1120],[316,724,905,1045,1121],[317,724,905,1046,1121],[318,724,906,1046,1121],[318,725,906,1046,1122],[319,725,906,1047,1122],[319,726,907,1047,1122],[320,726,907,1047,1123],[320,727,907,1048,1123],[321,727,908,1048,1124],[322,728,908,1048,1124],[322,728,909,1049,1124],[323,729,909,1049,1125],[323,729,910,1050,1125],[324,730,910,1050,1126],[324,730,911,1051,1126],[325,731,911,1051,1127],[325,731,912,1052,1127],[326,732,912,1052,1128],[326,732,913,1053,1128],[326,733,913,1053,1129],[327,733,914,1054,1129],[327,734,914,1054,1130],[328,734,915,1055,1131],[328,735,916,1056,1131],[328,735,916,1056,1132],[329,736,917,1057,1132],[329,736,917,1058,1133],[329,736,918,1058,1134],[330,737,919,1059,1134],[330,737,919,1060,1135],[330,738,920,1060,1135],[331,738,921,1061,1136],[331,739,921,1062,1137],[331,739,922,1062,1137],[331,740,923,1063,1138],[331,740,923,1064,1138],[331,740,924,1065,1139],[332,741,924,1065,1140],[332,741,925,1066,1140],[332,741,926,1067,1141],[332,742,926,1067,1142],[332,742,927,1068,1142],[332,742,928,1069,1143],[332,743,928,1070,1143],[332,743,929,1070,1144],[332,743,930,1071,1145],[332,744,930,1072,1145],[332,744,931,1072,1146],[331,744,931,1073,1147],[331,744,932,1074,1147],[331,744,933,1075,1148],[331,745,933,1075,1148],[331,745,934,1076,1149],[331,745,934,1077,1149],[330,745,935,1077,1150]],"samples":[0,15,30,45,60,75,91,106,122],"offsets":{"1":[[0,-1,-1,-1,-1],[-1,-2,-1,-1,-1],[-1,-2,-1,0,-1],[-2,-1,0,0,0],[-3,-1,0,1,0],[-2,-1,1,0,0],[-2,-1,0,0,0],[-2,-1,0,1,0],[-2,-1,0,1,0]],"2":[[4,3,3,3,2],[3,3,4,4,3],[3,3,4,5,3],[2,3,4,5,4],[1,3,5,6,5],[2,3,6,5,5],[1,3,5,5,5],[1,3,5,5,5],[2,3,4,5,4]],"3":[[3,2,2,2,2],[2,2,2,2,2],[2,2,2,3,2],[1,2,3,3,3],[1,2,3,4,3],[1,2,4,3,3],[1,2,3,3,3],[1,2,3,3,3],[2,2,3,3,3]],"4":[[-4,-5,-6,-5,-6],[-5,-6,-4,-4,-5],[-6,-6,-4,-3,-4],[-7,-5,-3,-3,-4],[-8,-5,-3,-1,-3],[-7,-5,-2,-2,-3],[-8,-6,-3,-2,-2],[-8,-5,-2,-2,-3],[-6,-5,-3,-2,-3]],"5":[[10,10,10,10,10],[10,10,10,9,10],[11,10,9,9,9],[11,10,9,9,9],[10,10,9,9,9],[11,10,9,8,9],[11,10,8,8,9],[10,10,9,9,10],[11,10,9,9,9]],"6":[[9,7,6,8,5],[6,6,8,10,8],[4,6,10,13,10],[2,7,12,14,12],[0,7,14,16,13],[0,7,15,16,14],[0,7,14,16,14],[0,7,14,16,14],[3,7,12,14,12]],"7":[[3,3,3,3,3],[3,2,3,3,3],[3,2,3,3,3],[3,3,3,3,3],[2,3,3,3,3],[3,3,3,3,3],[3,3,3,3,3],[3,3,3,3,3],[3,3,3,3,3]],"8":[[23,20,19,22,19],[20,20,22,24,22],[18,20,24,27,24],[15,21,26,28,26],[14,21,28,31,28],[14,21,29,30,28],[14,20,28,31,28],[14,21,28,30,28],[16,21,26,29,26]],"9":[[11,9,7,10,7],[8,9,11,13,10],[6,9,13,16,13],[3,10,15,18,15],[1,9,17,21,17],[1,9,19,21,18],[0,9,18,21,18],[1,9,17,20,17],[4,9,15,18,15]],"10":[[4,4,4,4,4],[4,4,4,4,4],[4,4,3,4,4],[4,4,3,3,4],[4,4,3,4,4],[5,4,4,3,4],[4,4,3,3,4],[4,4,4,4,4],[4,4,4,4,4]],"11":[[5,4,5,5,5],[5,4,5,4,5],[5,4,4,4,4],[5,5,4,4,4],[5,5,4,4,4],[6,4,4,3,4],[5,4,4,4,4],[5,5,4,4,5],[5,5,4,4,4]],"12":[[23,20,18,22,19],[19,20,22,25,22],[16,20,25,28,25],[13,21,28,31,27],[11,21,30,33,30],[11,20,31,33,31],[11,20,30,34,31],[11,21,30,33,30],[14,21,27,31,27]],"13":[[12,11,11,12,11],[11,11,12,12,12],[11,11,12,13,12],[11,12,12,12,12],[10,12,12,13,13],[11,11,13,13,13],[11,11,12,13,13],[10,12,13,13,13],[11,12,12,13,12]],"14":[[4,2,2,3,1],[2,2,4,5,3],[0,2,5,7,5],[-1,3,7,8,6],[-3,3,8,10,8],[-3,2,9,10,8],[-3,2,8,10,8],[-3,3,8,10,8],[-1,3,7,9,6]],"15":[[4,3,3,3,3],[3,3,4,3,3],[4,3,3,4,3],[3,4,3,3,3],[3,4,3,4,4],[4,3,4,3,4],[3,3,3,3,4],[3,3,4,4,4],[4,4,3,4,4]],"16":[[4,3,3,3,3],[3,2,3,3,3],[3,2,3,3,3],[3,3,3,3,3],[2,3,3,4,3],[3,3,4,3,3],[3,3,3,3,3],[2,3,3,3,4],[3,3,3,4,3]],"17":[[-1,-2,-2,-1,-2],[-2,-2,-1,-1,-1],[-2,-2,-1,0,-1],[-3,-1,-1,0,-1],[-3,-1,0,1,0],[-3,-2,1,0,0],[-3,-2,0,0,0],[-3,-2,0,0,0],[-2,-1,-1,0,-1]],"18":[[10,10,10,10,10],[10,9,10,9,10],[10,9,9,10,9],[10,10,9,9,9],[10,10,9,10,10],[11,10,10,9,10],[11,10,9,9,10],[10,10,10,9,10],[11,10,9,10,10]],"19":[[-3,-4,-4,-3,-4],[-4,-4,-3,-3,-3],[-4,-4,-3,-2,-3],[-5,-3,-2,-2,-2],[-6,-3,-2,-1,-2],[-5,-4,-1,-1,-2],[-6,-4,-2,-1,-2],[-6,-4,-1,-1,-2],[-5,-3,-2,-1,-2]],"20":[[2,0,0,1,0],[1,0,1,1,1],[0,0,1,2,1],[0,1,2,2,2],[-1,1,2,3,2],[0,0,3,2,2],[-1,0,2,2,2],[-1,1,2,3,2],[0,1,2,3,2]],"21":[[18,16,14,18,14],[15,16,18,20,18],[12,16,20,24,20],[9,17,23,26,23],[7,17,25,28,25],[7,16,27,28,26],[7,16,26,29,26],[8,16,25,28,25],[10,16,23,26,22]],"22":[[11,9,9,10,9],[9,9,10,10,10],[9,9,11,12,10],[8,10,11,12,11],[7,10,12,13,12],[8,9,13,13,12],[7,9,12,13,12],[7,10,12,13,12],[8,10,11,12,11]],"23":[[8,8,8,8,8],[8,8,8,7,8],[9,8,7,8,7],[9,8,7,7,7],[8,8,7,7,7],[9,8,7,6,7],[9,8,7,7,7],[8,8,7,7,8],[9,8,7,8,8]],"24":[[-1,-2,-2,-2,-2],[-2,-2,-1,-1,-2],[-2,-2,-1,0,-2],[-3,-1,-1,0,-1],[-4,-2,0,1,0],[-3,-2,0,0,0],[-3,-2,0,0,0],[-4,-2,0,0,0],[-3,-2,-1,0,-1]],"25":[[8,8,8,8,9],[9,8,7,6,8],[10,8,6,6,7],[11,9,5,4,6],[11,9,4,4,5],[13,8,4,3,5],[12,8,3,3,5],[11,8,5,4,6],[11,9,5,5,6]],"26":[[1,0,0,1,0],[1,0,1,0,1],[1,0,0,1,0],[0,1,1,1,1],[0,1,1,1,1],[1,0,1,1,1],[0,0,0,1,1],[0,1,1,1,1],[1,1,1,1,1]],"27":[[-1,-2,-3,-2,-3],[-2,-3,-2,-2,-2],[-3,-3,-2,-1,-2],[-3,-2,-1,-1,-1],[-4,-2,-1,1,-1],[-3,-2,0,0,0],[-4,-3,-1,0,0],[-4,-2,0,0,0],[-3,-2,-1,0,-1]],"28":[[2,1,1,1,1],[2,1,2,1,2],[2,1,1,2,1],[2,2,1,1,1],[1,2,1,2,2],[2,1,2,1,1],[2,1,1,1,2],[1,2,2,1,2],[2,2,1,2,1]],"29":[[5,4,4,4,4],[4,3,4,4,4],[4,3,4,5,4],[3,4,4,5,4],[3,4,5,6,5],[3,4,5,5,5],[3,4,5,5,5],[3,4,5,5,5],[4,4,4,5,5]],"30":[[19,17,15,18,15],[16,16,19,21,18],[13,16,21,24,20],[11,17,23,26,23],[9,17,25,28,25],[9,17,27,28,26],[8,17,26,28,26],[9,17,25,27,25],[12,17,23,26,23]],"31":[[10,8,7,9,7],[7,8,10,11,9],[6,8,11,13,10],[4,9,12,14,12],[3,8,14,16,13],[3,8,15,16,14],[3,8,14,16,14],[3,8,14,15,14],[5,8,12,14,12]],"32":[[-3,-4,-4,-4,-5],[-4,-4,-3,-3,-4],[-5,-4,-3,-2,-3],[-6,-4,-2,-2,-3],[-6,-4,-2,-1,-2],[-6,-4,-1,-1,-2],[-6,-4,-2,-1,-2],[-6,-4,-2,-1,-2],[-5,-4,-2,-1,-3]],"33":[[-3,-5,-5,-4,-5],[-5,-5,-3,-3,-4],[-5,-5,-3,-2,-4],[-6,-4,-3,-2,-3],[-7,-4,-2,-1,-2],[-6,-5,-1,-1,-2],[-6,-5,-2,-1,-2],[-7,-4,-2,-1,-2],[-5,-4,-3,-2,-3]],"34":[[24,22,20,23,20],[21,22,24,26,24],[18,22,26,29,26],[16,23,29,31,28],[14,22,31,34,30],[13,22,32,34,31],[13,22,31,34,31],[14,22,31,33,30],[17,22,28,31,28]],"35":[[1,0,-1,0,-1],[-1,-1,1,2,0],[-1,-1,2,3,1],[-3,0,3,4,3],[-4,0,4,6,4],[-4,0,5,5,4],[-4,0,4,5,4],[-4,0,4,5,4],[-2,0,3,4,3]],"36":[[7,6,6,7,6],[6,6,7,7,7],[6,6,7,8,7],[5,7,8,9,8],[4,7,8,10,8],[5,6,9,9,9],[4,6,8,9,9],[4,6,9,9,9],[5,7,8,9,8]],"37":[[8,8,8,8,9],[8,8,7,6,8],[10,8,6,6,7],[10,9,5,5,6],[10,8,5,5,6],[11,8,5,3,5],[11,8,4,4,5],[10,8,5,4,6],[10,8,5,5,6]],"38":[[-5,-6,-6,-6,-6],[-6,-6,-5,-6,-6],[-6,-6,-5,-5,-6],[-7,-6,-5,-5,-5],[-8,-6,-5,-4,-5],[-7,-6,-4,-4,-4],[-7,-6,-5,-4,-4],[-8,-6,-4,-4,-4],[-7,-6,-5,-4,-5]],"39":[[4,1,1,3,0],[1,1,3,5,3],[-1,1,5,7,4],[-3,2,7,9,6],[-5,2,8,11,8],[-4,2,9,10,9],[-5,1,9,10,9],[-4,2,8,10,8],[-2,2,6,9,6]],"40":[[20,17,15,19,16],[16,17,19,22,19],[13,17,22,25,22],[10,18,24,27,24],[8,18,26,30,26],[8,17,28,30,27],[8,17,27,30,27],[8,17,27,29,26],[11,18,24,27,24]],"41":[[-1,-2,-2,-2,-3],[-2,-2,-1,-1,-2],[-2,-2,-1,0,-1],[-3,-2,-1,0,-1],[-4,-2,0,1,0],[-4,-2,1,0,0],[-4,-2,0,0,0],[-4,-2,0,0,0],[-3,-2,-1,0,-1]],"42":[[19,17,15,19,15],[16,17,19,21,19],[13,17,21,25,21],[10,18,24,27,24],[8,17,26,30,26],[8,17,28,30,27],[8,17,27,30,27],[8,17,26,29,26],[11,17,24,27,23]],"43":[[15,13,11,14,11],[12,12,15,17,14],[9,12,17,20,17],[6,13,20,23,20],[4,13,22,25,22],[4,13,23,25,23],[4,13,22,25,23],[4,13,22,24,22],[7,13,19,23,19]],"44":[[2,1,1,1,1],[1,1,2,1,1],[1,1,1,2,1],[1,2,1,2,1],[0,2,2,2,2],[1,1,2,1,2],[1,1,1,2,2],[1,1,2,2,2],[1,1,1,2,2]],"45":[[1,0,0,1,0],[0,0,1,1,1],[0,0,1,2,1],[0,1,1,2,1],[-1,1,2,3,2],[0,0,2,2,2],[-1,0,2,2,2],[-1,1,2,2,2],[0,1,1,2,1]],"46":[[2,1,1,1,1],[1,1,2,1,1],[1,1,2,2,1],[0,1,2,2,2],[-1,1,2,4,2],[0,1,3,3,3],[0,1,2,3,3],[-1,1,3,3,3],[0,1,2,3,2]],"47":[[4,3,3,3,3],[3,3,3,3,3],[4,3,3,3,3],[4,4,3,3,3],[3,4,3,3,3],[4,3,3,2,3],[4,3,3,3,3],[3,3,3,3,3],[4,4,3,3,3]],"48":[[8,6,6,7,6],[6,6,7,8,7],[5,6,8,9,8],[4,7,9,10,9],[3,7,10,11,10],[4,6,11,11,10],[3,6,10,11,10],[3,6,10,11,10],[5,7,9,10,9]],"49":[[3,2,2,3,2],[2,2,3,3,3],[3,2,3,3,3],[2,3,3,3,3],[1,3,3,4,3],[2,2,4,3,3],[2,2,3,3,3],[2,3,3,3,4],[2,3,3,4,3]],"50":[[13,10,9,12,9],[9,10,12,14,12],[7,10,14,17,14],[5,11,16,19,16],[3,11,18,21,18],[3,10,19,21,19],[3,10,19,21,19],[3,11,18,20,18],[6,11,16,19,16]],"51":[[7,7,7,7,8],[7,7,7,6,7],[8,7,6,6,6],[8,8,5,5,6],[8,8,5,6,6],[9,7,6,4,6],[9,7,5,5,6],[8,7,6,5,6],[9,7,6,6,6]],"52":[[6,6,6,6,6],[6,6,6,5,6],[7,6,5,6,5],[7,7,5,5,5],[7,7,5,5,5],[8,6,5,4,5],[7,6,4,4,5],[7,6,5,5,6],[7,6,5,5,6]],"53":[[6,5,5,5,6],[6,5,6,5,6],[6,5,5,5,5],[6,6,5,4,5],[6,6,4,5,5],[7,5,5,4,5],[6,5,4,4,5],[6,6,5,5,5],[6,6,5,5,5]],"54":[[3,2,1,3,1],[1,1,3,4,3],[0,1,4,6,4],[-2,2,6,7,5],[-3,2,7,9,6],[-3,2,8,8,7],[-3,1,7,8,7],[-3,2,7,8,7],[-1,2,5,7,5]],"55":[[23,20,19,22,19],[19,20,22,25,22],[17,20,25,29,25],[14,21,28,31,28],[11,21,30,34,30],[11,20,32,34,31],[11,20,31,34,31],[12,21,30,33,30],[15,21,27,31,27]],"56":[[19,16,15,18,15],[15,16,19,21,18],[13,16,21,24,21],[10,17,24,26,23],[8,17,26,29,25],[8,17,27,29,26],[7,16,26,29,26],[8,17,26,28,25],[11,17,23,26,23]],"57":[[-4,-5,-5,-5,-5],[-5,-5,-4,-5,-5],[-5,-5,-5,-4,-5],[-6,-5,-4,-4,-4],[-7,-5,-4,-3,-4],[-6,-5,-3,-3,-3],[-6,-5,-4,-3,-3],[-7,-5,-3,-3,-3],[-6,-5,-4,-3,-4]],"58":[[9,8,8,8,8],[8,8,8,8,8],[8,8,8,8,8],[8,9,8,8,8],[8,8,8,9,8],[8,8,9,8,8],[8,8,8,8,8],[8,8,8,8,9],[8,8,8,9,8]],"59":[[18,15,14,17,14],[14,15,17,20,17],[12,15,20,23,20],[9,16,22,25,22],[7,16,24,28,24],[6,15,26,28,25],[6,15,25,28,25],[7,16,24,27,24],[10,16,22,25,22]],"60":[[22,20,18,22,18],[19,20,22,25,22],[16,20,24,28,24],[13,21,27,30,27],[11,20,29,33,29],[11,20,31,33,30],[10,20,30,33,30],[11,20,29,32,29],[14,20,27,30,27]],"61":[[8,7,7,7,7],[7,7,7,7,7],[7,7,7,8,7],[7,7,7,7,7],[6,7,7,8,8],[7,7,8,7,8],[7,7,7,7,8],[6,7,8,8,8],[7,7,7,8,7]],"62":[[8,7,7,7,7],[7,7,8,8,7],[7,7,8,9,8],[6,8,8,9,8],[5,8,9,10,9],[6,7,10,9,9],[6,7,9,9,9],[5,7,9,9,9],[6,7,8,9,8]],"63":[[4,2,2,3,2],[2,2,3,4,3],[1,2,4,5,4],[0,3,5,6,5],[-1,3,6,7,6],[-1,2,7,7,6],[-1,2,6,7,6],[-1,2,6,7,6],[0,3,5,6,5]],"64":[[-2,-3,-3,-3,-3],[-3,-3,-2,-3,-2],[-2,-3,-3,-2,-3],[-3,-2,-2,-2,-2],[-3,-2,-2,-1,-2],[-3,-3,-1,-2,-2],[-3,-3,-2,-2,-2],[-3,-3,-2,-2,-2],[-3,-2,-2,-2,-2]],"65":[[7,6,6,6,6],[6,6,6,6,6],[6,6,6,6,6],[6,6,6,6,6],[6,6,6,7,6],[6,6,7,6,6],[6,6,6,6,6],[6,6,6,6,6],[6,6,6,6,6]],"66":[[7,7,7,7,7],[7,6,7,6,7],[8,6,6,6,6],[8,7,5,5,6],[8,7,5,6,6],[9,7,6,4,6],[8,6,5,5,6],[8,7,6,5,6],[8,7,6,6,6]],"67":[[9,9,9,9,9],[9,9,9,8,9],[10,9,8,9,8],[10,10,8,8,8],[10,10,8,8,8],[11,9,8,7,8],[10,9,7,7,8],[10,9,8,8,9],[10,9,8,8,9]],"68":[[2,0,0,1,-1],[0,0,2,2,1],[-1,0,2,4,2],[-3,1,4,5,3],[-4,1,5,7,4],[-3,0,6,6,5],[-4,0,5,6,5],[-4,0,5,6,5],[-2,1,4,5,3]],"69":[[8,8,8,7,8],[8,7,7,6,8],[9,7,6,6,7],[9,8,5,5,6],[10,8,5,5,6],[11,8,5,4,6],[10,8,5,4,6],[10,8,5,5,6],[10,8,6,6,6]],"70":[[17,14,12,16,13],[13,14,16,19,16],[10,14,19,22,18],[8,15,21,24,21],[5,15,23,27,23],[5,14,25,27,24],[5,14,24,27,24],[6,14,23,26,23],[8,15,21,24,21]],"71":[[17,15,14,16,14],[14,15,17,19,16],[12,15,19,22,19],[9,16,21,23,21],[7,16,23,26,23],[7,15,24,26,23],[7,15,23,26,23],[8,15,23,25,23],[10,15,21,24,21]],"72":[[14,12,11,14,11],[11,12,14,16,14],[9,12,16,19,16],[7,13,18,20,18],[5,13,20,23,20],[5,12,21,23,20],[5,12,20,23,20],[5,12,20,22,20],[8,13,18,21,18]],"73":[[8,8,8,7,9],[8,8,7,6,8],[10,8,5,5,6],[11,9,4,4,5],[11,8,4,4,5],[12,8,4,2,5],[12,8,3,2,5],[11,8,4,3,5],[11,8,5,5,6]],"74":[[3,2,2,2,2],[3,2,3,2,3],[3,2,2,3,2],[3,3,2,2,2],[2,3,2,3,2],[3,2,3,2,2],[3,2,2,2,2],[2,3,2,2,3],[3,3,2,3,2]],"75":[[-1,-3,-3,-2,-3],[-3,-3,-1,-1,-2],[-4,-3,-1,1,-1],[-6,-2,1,2,0],[-7,-2,2,3,1],[-6,-3,3,3,2],[-7,-3,2,3,2],[-6,-2,2,3,2],[-5,-2,1,2,0]],"76":[[15,13,13,14,12],[13,13,15,16,14],[11,13,16,18,16],[9,14,18,20,18],[8,14,19,21,19],[8,13,20,21,20],[8,13,20,21,20],[8,14,19,21,19],[10,14,18,20,17]],"77":[[3,2,2,3,2],[3,2,3,3,3],[3,2,3,4,3],[2,3,3,4,3],[1,3,4,5,4],[2,2,5,4,4],[2,2,4,4,4],[1,3,4,4,4],[2,3,3,4,4]],"78":[[2,1,2,2,2],[2,1,2,2,2],[2,1,2,2,2],[2,2,2,2,2],[1,2,2,3,2],[2,2,3,2,2],[2,1,2,2,2],[1,2,2,2,2],[2,2,2,2,2]],"79":[[4,3,3,3,3],[3,3,3,3,3],[3,3,3,4,3],[2,3,4,4,4],[2,3,4,5,4],[2,3,5,4,4],[2,3,4,4,4],[2,3,4,4,4],[3,3,4,4,4]],"80":[[12,9,8,11,8],[9,9,11,13,11],[7,9,13,16,13],[5,10,15,17,15],[3,10,17,19,16],[3,9,18,19,17],[3,9,17,19,17],[3,10,17,19,16],[5,10,15,17,15]],"81":[[17,14,13,16,13],[13,14,16,18,16],[11,14,18,21,18],[9,15,20,23,20],[7,15,22,25,22],[7,14,24,25,23],[7,14,23,25,23],[7,15,22,24,22],[10,15,20,23,20]],"82":[[9,8,7,9,7],[7,7,9,10,9],[6,7,10,12,10],[4,8,12,13,11],[3,8,13,15,13],[3,8,14,14,13],[3,8,13,15,13],[3,8,13,14,13],[5,8,12,13,11]],"83":[[-2,-4,-4,-3,-4],[-3,-4,-3,-3,-3],[-4,-4,-3,-2,-3],[-5,-3,-2,-2,-2],[-5,-3,-2,-1,-2],[-4,-4,-1,-2,-2],[-5,-4,-2,-1,-2],[-5,-3,-2,-1,-2],[-4,-3,-2,-1,-2]],"84":[[7,7,7,7,7],[7,6,7,6,7],[7,6,6,7,6],[7,7,6,6,6],[7,7,6,7,7],[8,7,7,6,7],[7,7,6,6,7],[7,7,7,6,7],[8,7,6,7,7]],"85":[[7,7,7,7,7],[7,6,7,7,7],[7,6,7,7,7],[7,7,7,7,7],[7,7,7,7,7],[7,7,7,6,7],[7,7,7,7,7],[7,7,7,7,7],[7,7,7,7,7]]},"cities":[[0,"مسقط"],[1,"ابراء"],[2,"ادم"],[3,"ازكي"],[4,"الأشخرة"],[5,"البريمي"],[6,"الجازر"],[7,"الجمة"],[8,"الحشمان"],[9,"الحلانيات"],[10,"الحمرة"],[11,"الخابورة"],[12,"الخضرفي"],[13,"الخوير"],[14,"الدقم"],[15,"الرستاق"],[16,"العوابي"],[17,"القابل الشرقية"],[18,"القابل الظاهرة"],[19,"الكامل و الوافي"],[20,"المضيبي"],[21,"المعمورة"],[22,"الهويسة"],[23,"الواسط"],[24,"الواصل"],[25,"بخا"],[26,"بدبد"],[27,"بدية"],[28,"بركاء"],[29,"بهلاء"],[30,"ثمريت"],[31,"جدة الحراسيس"],[32,"جعلان بوحسن"],[33,"جعلان بوعلي"],[34,"حبروت"],[35,"حج"],[36,"خزان"],[37,"دبا البيعة"],[38,"راس الحد"],[39,"راس مدركة"],[40,"رخيوت"],[41,"رمال الوهيبة"],[42,"ريسوت"],[43,"سدح"],[44,"سمائل"],[45,"سمد الشان"],[46,"سناو"],[47,"سويق"],[48,"سيح الرول"],[49,"سيق"],[50,"شليم"],[51,"شناص"],[52,"صحار"],[53,"صحم"],[54,"صراب"],[55,"صرفيت"],[56,"صلالة"],[57,"صور"],[58,"ضنك"],[59,"طاقة"],[60,"ظلكوت"],[61,"عبري"],[62,"فهود"],[63,"قرن العلم"],[64,"قريات"],[65,"كنهات"],[66,"لوى"],[67,"محضة"],[68,"محوت"],[69,"مدحا"],[70,"مرباط"],[71,"مرمور"],[72,"مرمول"],[73,"مسندم"],[74,"مصنعة"],[75,"مصيرة"],[76,"مقشن"],[77,"منح"],[78,"نخل"],[79,"نزوى"],[80,"نمر"],[81,"هرويل"],[82,"هيماء"],[83,"وادي بني خالد"],[84,"وادي حيبي"],[85,"ينقل"]]};
 const COURSES = {
   calc: { en: 'Calculus', ar: 'التفاضل والتكامل' }, os: { en: 'Operating Systems', ar: 'نظم التشغيل' },
   eng: { en: 'English', ar: 'اللغة الإنجليزية' }, db: { en: 'Databases', ar: 'قواعد البيانات' },
@@ -926,11 +938,12 @@ const I18N = {
     'knot.untangle': 'Untangle into my week', 'knot.tangle': 'Tangle again', 'knot.see': 'See the week',
     'kl.thick': 'thicker = more hours', 'kl.bead': 'bead = risk', 'kl.glow': 'coral glow = most at risk',
     'wk.prev': 'Earlier', 'wk.now': 'This week', 'wk.next': 'Later', 'wk.replan': 'Re-plan', 'wk.copy': 'Copy my week',
-    'wk.note': "Striped = class (sample timetable) · lilac = prayer time ±15 min (approximate Muscat times) · click a block to see why it's there.",
+    'wk.note': "Striped = class (sample timetable) · lilac = prayer time ±15 min (Ministry of Awqaf times for your city) · click a block to see why it's there.", 'wk.city': 'Prayer times for',
     'wk.free': 'No study blocks: free day', 'wk.today': 'today', 'wk.weekend': 'weekend',
     'set.title': 'Your week setup: classes, prayer times, sleep and study cap', 'set.study': 'Study rhythm', 'set.cap': 'Daily study cap (h)', 'set.wcap': 'Weekend-day cap (h)',
     'set.buf': 'Finish early by (h)', 'set.wake': 'Wake up', 'set.sleep': 'Sleep', 'set.weekend': 'Weekend days', 'set.prayer': 'Prayer times',
-    'set.prayerNote': 'Approximate Muscat times for early October, not an official timetable. Edit them to match your mosque.',
+    'set.prayerNote': 'Daily times from the Ministry of Awqaf and Religious Affairs calendar (mara.gov.om). Pick your city.', 'set.city': 'City', 'set.today': '{c}, {d}:',
+    'toast.city': 'Prayer times: {c}', 'toast.cityS': 'The week re-planned around the Ministry times for this city.',
     'set.pbuf': 'Keep free before and after (min)', 'set.effort': 'Effort estimates (h)', 'set.effortNote': 'Default hours per task type. These are estimates; change them to fit you.',
     'set.classes': 'Class timetable (sample)', 'set.classesNote': 'Sample timetable to show how planning works. Replace it with your own classes.', 'set.addClass': 'Add a class',
     'set.className': 'Class name', 'set.remove': 'Remove class',
@@ -951,7 +964,7 @@ const I18N = {
     'hf.4h': 'What to cut', 'hf.4': 'Among the tasks competing for the same time as the riskiest one, it suggests the lowest written weight (ties go to the bigger task). Unknown weights count as 100 % so nothing is cut blindly.',
     'team.eyebrow': 'Built by', 'team.title': 'The two people behind Rattib', 'role.ceo': 'CEO', 'role.community': 'Community & social', 'role.lead': 'Project Team lead', 'role.idea': 'Idea owner',
     'foot.made': 'Built by AlSalt Al-Salti and Omar Al-Salti with Claude Code',
-    'foot.note': 'Sample deadlines and timetable are labelled as samples. Prayer times are approximate, so check your local timetable. Hours are estimates, not promises.',
+    'foot.note': 'Sample deadlines and timetable are labelled as samples. Prayer times come from the Ministry of Awqaf and Religious Affairs calendar. Hours are estimates, not promises.',
     'foot.top': 'Back to top',
     // dynamic
     'risk.safe': 'Safe', 'risk.watch': 'Watch', 'risk.risk': 'At risk', 'risk.overdue': 'Past due', 'risk.nodate': 'Needs a date', 'risk.cut': 'Cut', 'risk.done': 'Done',
@@ -978,7 +991,7 @@ const I18N = {
     'blk.rFree': 'This time is free, with no class or prayer time.', 'blk.rAfter': 'It starts right after {x}.', 'blk.rBefore': 'It ends before {x}.',
     'blk.rCap': '{day}: {u} h of study planned (cap {c} h).', 'blk.done': 'Mark done', 'blk.undo': 'Mark not done', 'blk.close': 'Close',
     'blk.doneNote': 'You marked this block done, so its hours count as finished.',
-    'wk.range': '{a} – {b}', 'wk.class': 'class', 'wk.prayerAt': '{p} ≈{t}',
+    'wk.range': '{a} – {b}', 'wk.class': 'class', 'wk.prayerAt': '{p} {t}',
     'prayer.fajr': 'Fajr', 'prayer.dhuhr': 'Dhuhr', 'prayer.asr': 'Asr', 'prayer.maghrib': 'Maghrib', 'prayer.isha': 'Isha',
     'pc.counts.risk': '{n} at risk', 'pc.counts.watch': '{n} watch', 'pc.counts.safe': '{n} safe',
     'pc.tension': 'Tension <b>{p}%</b>: {d} h needed, {c} h free before the last deadline', 'pc.tensionNone': 'No tension: nothing to plan yet.',
@@ -1023,11 +1036,12 @@ const I18N = {
     'knot.untangle': 'فكّ العقدة إلى أسبوعي', 'knot.tangle': 'أعد التشابك', 'knot.see': 'اعرض الأسبوع',
     'kl.thick': 'أسمك = ساعات أكثر', 'kl.bead': 'الخرزة = مستوى الخطر', 'kl.glow': 'التوهج المرجاني = الأكثر خطرًا',
     'wk.prev': 'السابق', 'wk.now': 'هذا الأسبوع', 'wk.next': 'التالي', 'wk.replan': 'أعد التخطيط', 'wk.copy': 'انسخ أسبوعي',
-    'wk.note': 'المخطّط = محاضرة (جدول تجريبي) · البنفسجي = وقت الصلاة ±15 دقيقة (أوقات تقريبية لمسقط) · اضغط على أي فترة لتعرف سبب وضعها.',
+    'wk.city': 'أوقات الصلاة في', 'wk.note': 'المخطّط = محاضرة (جدول تجريبي) · البنفسجي = وقت الصلاة ±15 دقيقة (حسب تقويم وزارة الأوقاف لمدينتك) · اضغط على أي فترة لتعرف سبب وضعها.',
     'wk.free': 'لا توجد فترات مذاكرة: يوم حر', 'wk.today': 'اليوم', 'wk.weekend': 'عطلة',
     'set.title': 'إعداد أسبوعك: المحاضرات وأوقات الصلاة والنوم وحد المذاكرة', 'set.study': 'إيقاع المذاكرة', 'set.cap': 'حد المذاكرة اليومي (ساعة)', 'set.wcap': 'حد يوم العطلة (ساعة)',
     'set.buf': 'أنهِ قبل الموعد بـ (ساعة)', 'set.wake': 'الاستيقاظ', 'set.sleep': 'النوم', 'set.weekend': 'أيام العطلة', 'set.prayer': 'أوقات الصلاة',
-    'set.prayerNote': 'أوقات تقريبية لمسقط في أوائل أكتوبر، وليست تقويمًا رسميًا. عدّلها لتطابق مسجدك.',
+    'set.prayerNote': 'أوقات يومية من تقويم وزارة الأوقاف والشؤون الدينية (mara.gov.om). اختر مدينتك.', 'set.city': 'المدينة', 'set.today': '{c}، {d}:',
+    'toast.city': 'أوقات الصلاة: {c}', 'toast.cityS': 'أُعيد تخطيط الأسبوع حسب أوقات الوزارة لهذه المدينة.',
     'set.pbuf': 'وقت فارغ قبلها وبعدها (دقيقة)', 'set.effort': 'تقدير الجهد (ساعة)', 'set.effortNote': 'الساعات الافتراضية لكل نوع مهمة. هذه تقديرات، غيّرها لتناسبك.',
     'set.classes': 'جدول المحاضرات (تجريبي)', 'set.classesNote': 'جدول تجريبي يوضّح طريقة التخطيط. استبدله بمحاضراتك.', 'set.addClass': 'أضف محاضرة',
     'set.className': 'اسم المحاضرة', 'set.remove': 'احذف المحاضرة',
@@ -1048,7 +1062,7 @@ const I18N = {
     'hf.4h': 'ماذا نقطع', 'hf.4': 'من بين المهام المتنافسة على نفس الوقت مع المهمة الأخطر، يقترح الأقل وزنًا مكتوبًا (وعند التساوي الأكبر حجمًا). الوزن غير المعروف يُحسب 100٪ حتى لا يُقطع شيء عشوائيًا.',
     'team.eyebrow': 'صُنع بواسطة', 'team.title': 'الشخصان وراء رتّب', 'role.ceo': 'الرئيس التنفيذي', 'role.community': 'المجتمع والتواصل الاجتماعي', 'role.lead': 'قائد فريق المشروع', 'role.idea': 'صاحب الفكرة',
     'foot.made': 'صنعه AlSalt Al-Salti و Omar Al-Salti باستخدام Claude Code',
-    'foot.note': 'المواعيد والجدول التجريبي موسومة بأنها تجريبية. أوقات الصلاة تقريبية فراجع التقويم المحلي. الساعات تقديرات وليست وعودًا.',
+    'foot.note': 'المواعيد والجدول التجريبي موسومة بأنها تجريبية. أوقات الصلاة من تقويم وزارة الأوقاف والشؤون الدينية. الساعات تقديرات وليست وعودًا.',
     'foot.top': 'إلى الأعلى',
     'risk.safe': 'آمن', 'risk.watch': 'انتبه', 'risk.risk': 'في خطر', 'risk.overdue': 'فات موعده', 'risk.nodate': 'يحتاج تاريخًا', 'risk.cut': 'مقطوع', 'risk.done': 'منجز',
     'type.quiz': 'كويز', 'type.lab': 'مختبر', 'type.assignment': 'واجب', 'type.report': 'تقرير', 'type.presentation': 'عرض تقديمي', 'type.essay': 'مقال', 'type.midterm': 'اختبار منتصف الفصل', 'type.exam': 'امتحان', 'type.project': 'مشروع', 'type.other': 'أخرى',
@@ -1074,7 +1088,7 @@ const I18N = {
     'blk.rFree': 'هذا الوقت فارغ، بلا محاضرة أو صلاة.', 'blk.rAfter': 'تبدأ بعد {x} مباشرة.', 'blk.rBefore': 'تنتهي قبل {x}.',
     'blk.rCap': '{day}: {u} ساعة مذاكرة مخطّطة (الحد {c} ساعات).', 'blk.done': 'تم الإنجاز', 'blk.undo': 'إلغاء الإنجاز', 'blk.close': 'إغلاق',
     'blk.doneNote': 'علّمت هذه الفترة كمنجزة، لذا تُحسب ساعاتها منتهية.',
-    'wk.range': '{a} – {b}', 'wk.class': 'محاضرة', 'wk.prayerAt': '{p} ≈{t}',
+    'wk.range': '{a} – {b}', 'wk.class': 'محاضرة', 'wk.prayerAt': '{p} {t}',
     'prayer.fajr': 'الفجر', 'prayer.dhuhr': 'الظهر', 'prayer.asr': 'العصر', 'prayer.maghrib': 'المغرب', 'prayer.isha': 'العشاء',
     'pc.counts.risk': '{n} في خطر', 'pc.counts.watch': '{n} انتبه', 'pc.counts.safe': '{n} آمن',
     'pc.tension': 'الشد <b>{p}٪</b>: {d} ساعة مطلوبة، و{c} ساعة فارغة قبل آخر موعد', 'pc.tensionNone': 'لا شد: لا شيء لتخطيطه بعد.',
@@ -1129,7 +1143,7 @@ function load() {
   const d = store.get(KEY, null);
   if (!d || typeof d !== 'object') return false;
   if (Array.isArray(d.tasks)) state.tasks = d.tasks.filter(t => t && t.id);
-  if (d.settings) state.settings = { ...clone(DEFAULT_SETTINGS), ...d.settings, prayers: { ...DEFAULT_SETTINGS.prayers, ...(d.settings.prayers || {}) }, effort: { ...DEFAULT_SETTINGS.effort, ...(d.settings.effort || {}) } };
+  if (d.settings) state.settings = { ...clone(DEFAULT_SETTINGS), ...d.settings, effort: { ...DEFAULT_SETTINGS.effort, ...(d.settings.effort || {}) } };
   if (Array.isArray(d.doneBlocks)) state.doneBlocks = d.doneBlocks;
   if (typeof d.heroText === 'string') state.heroText = d.heroText;
   if (d.lang === 'ar' || d.lang === 'en') state.lang = d.lang;
@@ -1340,6 +1354,35 @@ function relDay(ms, now = Date.now()) {
   if (diff > 1 && diff < 7) return DAY_SHORT[state.lang][new Date(ms).getDay()];
   return fmtDate(ms);
 }
+
+/* ---------- 3.1b Prayer times (Ministry data, per city, per day) ---------- */
+const Prayer = (() => {
+  const D = PRAYER_DATA;
+  const [y, m, d] = D.start.split('-').map(Number);
+  const start = new Date(y, m - 1, d).getTime();
+  const last = D.muscat.length - 1;
+  const names = new Map(D.cities);
+  // Minutes after midnight for each prayer on a given day in a given city.
+  function times(dayMs, cityId) {
+    const raw = Math.round((dayStart(dayMs) - start) / DAY);
+    const i = Math.max(0, Math.min(last, raw)); // outside the saved range: nearest saved day
+    const base = D.muscat[i];
+    const off = D.offsets[cityId];
+    let o = [0, 0, 0, 0, 0];
+    if (off) {
+      const S = D.samples;
+      let k = 0;
+      while (k < S.length - 2 && i > S[k + 1]) k++;
+      const f = Math.max(0, Math.min(1, (i - S[k]) / (S[k + 1] - S[k])));
+      o = off[k].map((v, j) => Math.round(v + (off[k + 1][j] - v) * f));
+    }
+    const out = { inRange: raw === i };
+    PRAYERS.forEach((p, j) => { out[p] = base[j] + o[j]; });
+    return out;
+  }
+  const label = mins => pad(Math.floor(mins / 60)) + ':' + pad(mins % 60);
+  return { times, label, cities: D.cities, name: id => names.get(Number(id)) || names.get(0), has: id => names.has(Number(id)) };
+})();
 
 /* ---------- 3.2 Parser: rule-based, bilingual, runs in the browser ---------- */
 const Parser = (() => {
@@ -1605,7 +1648,8 @@ const Planner = (() => {
     const list = [];
     (S.classes || []).forEach(c => { if (num(c.day, -1) === dow) { const s = day + hm(c.start) * MIN, e = day + hm(c.end) * MIN; if (e > s) list.push({ s, e, kind: 'class', label: c.name || '' }); } });
     const pb = Math.max(0, num(S.prayerBuffer, 15)) * MIN;
-    PRAYERS.forEach(p => { const at = day + hm(S.prayers[p]) * MIN; list.push({ s: at - pb, e: at + pb, kind: 'prayer', label: p, at }); });
+    const pt = Prayer.times(day, num(S.prayerCity, 0));
+    PRAYERS.forEach(p => { const at = day + pt[p] * MIN; list.push({ s: at - pb, e: at + pb, kind: 'prayer', label: p, at }); });
     return list;
   }
   function windowFor(day, S) {
@@ -2187,7 +2231,7 @@ function blockDetail(taskId, s, e, done) {
     const busy = Planner.busyFor(dayStart(s), S);
     const before = busy.find(b => Math.abs(b.e - s) <= 15 * MIN);
     const after = busy.find(b => Math.abs(b.s - e) <= 15 * MIN);
-    const name = b => b.kind === 'class' ? `${b.label} (${t('wk.class')})` : `${t('prayer.' + b.label)} ≈${fmtTime(b.at)}`;
+    const name = b => b.kind === 'class' ? `${b.label} (${t('wk.class')})` : `${t('prayer.' + b.label)} ${fmtTime(b.at)}`;
     if (before) lines.push(t('blk.rAfter', { x: name(before) }));
     if (after) lines.push(t('blk.rBefore', { x: name(after) }));
     if (!before && !after) lines.push(t('blk.rFree'));
@@ -2472,7 +2516,8 @@ function renderSetup() {
   const S = state.settings;
   $$('[data-set]').forEach(inp => { inp.value = S[inp.dataset.set]; });
   $('#weekend-pick').innerHTML = [0, 1, 2, 3, 4, 5, 6].map(d => `<label><input type="checkbox" data-weekend="${d}" ${S.weekend.includes(d) ? 'checked' : ''}>${esc(DAY_SHORT[state.lang][d])}</label>`).join('');
-  $('#prayer-rows').innerHTML = PRAYERS.map(p => `<div class="set-row"><label for="pr-${p}">${esc(t('prayer.' + p))}</label><input id="pr-${p}" type="time" data-prayer="${p}" value="${esc(S.prayers[p])}"></div>`).join('');
+  fillCitySelects();
+  renderPrayerToday();
   $('#effort-rows').innerHTML = TYPES.map(ty => `<div class="set-row"><label for="ef-${ty}">${esc(t('type.' + ty))}</label><input id="ef-${ty}" type="number" min="0.5" max="80" step="0.5" data-effort="${ty}" value="${S.effort[ty]}"></div>`).join('');
   $('#class-rows').innerHTML = S.classes.map((c, i) => `<div class="cls-row">
     <input type="text" data-cls="${i}" data-f="name" value="${esc(c.name)}" aria-label="${esc(t('set.className'))}" maxlength="40">
@@ -2481,16 +2526,39 @@ function renderSetup() {
     <input type="time" data-cls="${i}" data-f="end" value="${esc(c.end)}" aria-label="End">
     <button type="button" class="icon-btn" data-cls-del="${i}" aria-label="${esc(t('set.remove'))}: ${esc(c.name)}">${ICONS.trash}</button></div>`).join('');
 }
+const CITY_KEY = KEY + '-city'; // remembered on purpose: survives Reset, like the sound choice
+function fillCitySelects() {
+  const id = num(state.settings.prayerCity, 0);
+  $$('.city-select').forEach(sel => {
+    if (!sel.options.length) sel.innerHTML = Prayer.cities.map(([cid, name]) => `<option value="${cid}" lang="ar">${esc(name)}</option>`).join('');
+    sel.value = String(id);
+  });
+}
+function renderPrayerToday() {
+  const box = $('#prayer-rows'); if (!box) return;
+  const pt = Prayer.times(Date.now(), num(state.settings.prayerCity, 0));
+  box.innerHTML = `<p class="note">${esc(t('set.today', { c: Prayer.name(state.settings.prayerCity), d: fmtDay(Date.now()) }))}</p>` +
+    PRAYERS.map(p => `<span class="tag"><b>${esc(t('prayer.' + p))}</b> ${Prayer.label(pt[p])}</span>`).join('');
+}
+function setCity(id) {
+  if (!Prayer.has(id)) return;
+  state.settings.prayerCity = Number(id);
+  store.set(CITY_KEY, Number(id));
+  fillCitySelects(); renderPrayerToday();
+  Sound.play('tick');
+  scheduleRender();
+  toast(t('toast.city', { c: Prayer.name(id) }), t('toast.cityS'));
+}
 function readSetup(e) {
   const S = state.settings, el = e.target;
+  if (el.classList.contains('city-select')) return; // handled by setCity()
   if (el.dataset.set) {
     const k = el.dataset.set;
     if (['cap', 'weekendCap', 'buffer', 'prayerBuffer'].includes(k)) { const v = num(el.value, NaN); if (!Number.isFinite(v)) return; S[k] = Math.max(0, Math.min(k === 'buffer' ? 48 : k === 'prayerBuffer' ? 60 : 14, v)); }
     else if (/^\d{1,2}:\d{2}$/.test(el.value)) S[k] = el.value;
   } else if (el.dataset.weekend != null) {
     const d = num(el.dataset.weekend); S.weekend = el.checked ? [...new Set([...S.weekend, d])] : S.weekend.filter(x => x !== d);
-  } else if (el.dataset.prayer && /^\d{1,2}:\d{2}$/.test(el.value)) S.prayers[el.dataset.prayer] = el.value;
-  else if (el.dataset.effort) { const v = num(el.value, NaN); if (v >= 0.5 && v <= 80) S.effort[el.dataset.effort] = v; }
+  } else if (el.dataset.effort) { const v = num(el.value, NaN); if (v >= 0.5 && v <= 80) S.effort[el.dataset.effort] = v; }
   else if (el.dataset.cls != null) {
     const c = S.classes[num(el.dataset.cls)]; if (!c) return;
     const f = el.dataset.f;
@@ -2566,6 +2634,8 @@ function init() {
   const had = load();
   if (!had || !state.tasks.length && !store.get(KEY + '-touched', false)) seed();
   $('#chaos').value = state.heroText;
+  { const c = store.get(CITY_KEY, 0); state.settings.prayerCity = Prayer.has(c) ? Number(c) : 0; }
+  document.addEventListener('change', e => { if (e.target instanceof Element && e.target.classList.contains('city-select')) setCity(e.target.value); });
 
   Sound.init({ levels: { sfx: 0.55 } });
   Sound.onChange(syncSoundLabel);
@@ -2673,7 +2743,7 @@ function init() {
     if (!resetArmed) { resetArmed = setTimeout(() => { resetArmed = 0; b.textContent = t('ws.reset'); }, 4000); b.textContent = t('ws.resetSure'); Sound.play('tick'); return; }
     clearTimeout(resetArmed); resetArmed = 0; b.textContent = t('ws.reset');
     store.del(KEY); store.del(KEY + '-touched');
-    state.settings = clone(DEFAULT_SETTINGS); seed(); state.weekPage = 0; state.editing = null; state.selBlock = null; state.emailName = ''; state.emailLect = '';
+    state.settings = clone(DEFAULT_SETTINGS); { const c = store.get(CITY_KEY, 0); state.settings.prayerCity = Prayer.has(c) ? Number(c) : 0; } seed(); state.weekPage = 0; state.editing = null; state.selBlock = null; state.emailName = ''; state.emailLect = '';
     $('#chaos').value = HERO_DEFAULT; setInvalid(''); $('#block-detail').hidden = true;
     renderSetup(); Sound.play('whoosh'); renderAll(); toast(t('toast.reset'), t('toast.resetS'));
   });

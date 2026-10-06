@@ -28,7 +28,7 @@ Deadlines reach students from everywhere: class WhatsApp groups, Moodle and lect
 | | Feature | What you get |
 |---|---|---|
 | 🧵 | **Bilingual chaos parser** | Paste messy chat in English, Arabic or both. WhatsApp timestamps and names are stripped, and each deadline becomes a card with course, type, date, time, hours and weight. The words that gave each detail are highlighted, so you can see *why*. Understands `tmrw`, `next sun`, `14 oct`, `14/10`, `11:59pm`, `بكرة`, `بعد يومين`, `١١:٥٩ م`, Arabic day and month names and Arabic-Indic digits. |
-| 🪢 | **Physics knot + week planner** | Every deadline is a thread in a living knot you can drag apart. **Untangle** straightens them into a Sun–Thu week of study blocks placed around your classes, prayer times (±15 min), sleep and a 6 h daily cap. Click any block to see *why it's there* and mark it done. |
+| 🪢 | **Physics knot + week planner** | Every deadline is a thread in a living knot you can drag apart. **Untangle** straightens them into a Sun–Thu week of study blocks placed around your classes, the Ministry's prayer times for your city (±15 min), sleep and a 6 h daily cap. Click any block to see *why it's there* and mark it done. |
 | 🚨 | **Panic check + cut a thread** | Compares the hours you need with the free hours you actually have, and labels every task **safe / watch / at risk**. It suggests the lowest-weight task to postpone, with before/after numbers. One click cuts the thread, re-plans the week and writes a polite **extension email** in English or Arabic. |
 
 **Signature moment:** the tangled threads straighten into weft lines while translucent panels settle into the Sunday-to-Thursday columns of a loom, and your deadlines slide into place. The border is a woven pattern inspired by Omani textiles.
@@ -42,7 +42,7 @@ Deadlines reach students from everywhere: class WhatsApp groups, Moodle and lect
 
 ## Honest by design
 - 🔒 Everything runs **in your browser**. Nothing you paste is uploaded, data is saved only on your device, and **Reset** clears it.
-- 🕌 Prayer times are **approximate Muscat times** and editable. They are not an official timetable.
+- 🕌 Prayer times come from the **Ministry of Awqaf and Religious Affairs** calendar ([mara.gov.om](https://www.mara.gov.om/arabic/calendar_page1.asp)) for **86 cities**. The data was saved into the page (Oct 2026 – Jan 2027): Muscat for every day, and other cities on sample days with the days between interpolated (checked against the Ministry site to within 1 minute). Muscat is the default, and the city you pick is remembered.
 - 📝 Sample deadlines and the class timetable are labelled **sample**. Hours are **estimates** you can edit.
 
 ## Run it

@@ -4,10 +4,10 @@
 
 <img src="assets/logo.svg" alt="Rattib logo" width="112">
 
-### Paste the chaos. Untangle your week.
+### Empty your head. Untangle your week.
 
 **A bilingual (English + العربية) deadline untangler for college students in Oman.**
-Paste your WhatsApp group chat, Moodle notices and lecturer emails, and get back a calm, time-blocked week planned around your classes and prayer times. Rattib also tells you which deadline is *really* at risk.
+Write down everything that's due, the way it comes to mind (or paste it from WhatsApp, Moodle or email), and get back a calm, time-blocked week planned around your classes and prayer times. Rattib also tells you which deadline is *really* at risk.
 
 [**Open the live site → rattib-om.netlify.app**](https://rattib-om.netlify.app)  ·  mirror: [alsalti99.github.io/rattib](https://alsalti99.github.io/rattib/)
 
@@ -16,7 +16,7 @@ Paste your WhatsApp group chat, Moodle notices and lecturer emails, and get back
 ![English + Arabic](https://img.shields.io/badge/language-English%20%2B%20%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-6BC8FF)
 ![Privacy](https://img.shields.io/badge/data-stays%20on%20your%20device-0B7F72)
 
-<a href="https://rattib-om.netlify.app/assets/preview.mp4"><img src="assets/preview.gif" alt="30-second Rattib preview: paste the chaos, untangle it, see what's really at risk" width="820"></a>
+<a href="https://rattib-om.netlify.app/assets/preview.mp4"><img src="assets/preview.gif" alt="30-second Rattib preview: get your deadlines out of your head, untangle them, see what's really at risk" width="820"></a>
 
 <sub>▶ Click the preview for the full video with sound</sub>
 
@@ -31,7 +31,7 @@ Deadlines reach students from everywhere: class WhatsApp groups, Moodle and lect
 
 | | Feature | What you get |
 |---|---|---|
-| 🧵 | **Bilingual chaos parser** | Paste messy chat in English, Arabic or both. WhatsApp timestamps and names are stripped, and each deadline becomes a card with course, type, date, time, hours and weight. The words that gave each detail are highlighted, so you can see *why*. Understands `tmrw`, `next sun`, `14 oct`, `14/10`, `11:59pm`, `بكرة`, `بعد يومين`, `١١:٥٩ م`, Arabic day and month names and Arabic-Indic digits. |
+| 🧵 | **Bilingual chaos parser** | Brain-dump your deadlines, or paste messy chat, in English, Arabic or both. WhatsApp timestamps and names are stripped, and each deadline becomes a card with course, type, date, time, hours and weight. The words that gave each detail are highlighted, so you can see *why*. Understands `tmrw`, `next sun`, `14 oct`, `14/10`, `11:59pm`, `بكرة`, `بعد يومين`, `١١:٥٩ م`, Arabic day and month names and Arabic-Indic digits. |
 | 🪢 | **Physics knot + week planner** | Every deadline is a thread in a living knot you can drag apart. **Untangle** straightens them into a Sun–Thu week of study blocks placed around your classes, the Ministry's prayer times for your city (±15 min), sleep and a 6 h daily cap. Click any block to see *why it's there* and mark it done. |
 | 🚨 | **Panic check + cut a thread** | Compares the hours you need with the free hours you actually have, and labels every task **safe / watch / at risk**. It suggests the lowest-weight task to postpone, with before/after numbers. One click cuts the thread, re-plans the week and writes a polite **extension email** in English or Arabic. |
 

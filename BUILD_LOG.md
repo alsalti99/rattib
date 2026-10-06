@@ -59,6 +59,8 @@ The team brought one concept: Rattib Untangle (the brief was sent with `/build`)
 
 - [20:48] team clarification → the preview video belongs on **GitHub only**: removed the video section, its CSS, strings, autoplay code and poster image from the website. The README keeps the looping GIF preview, which links to the full video file with sound.
 
+- [21:44] team requests → **legit first run + demo mode + brain dump**. The app now starts empty: no seeded deadlines and no sample timetable (storage key bumped to v2; the city choice is kept). There are designed empty states in the hero (decorative ghost threads, No deadlines yet cards), Threads, Knot and Week. A **Try the demo** button loads the sample group chat and class timetable and plays the untangle. A demo bar shows Exit demo; demo data is never saved, and exiting or reloading restores the visitor's own data (tested with real deadlines). The text box became a **Brain dump** (label, hint, 4-line example placeholder, typed or pasted). The slogan is now **Empty your head. Untangle your week.** (AR: فرّغ ما في رأسك. ورتّب أسبوعك.) with a new lede, and the README and meta description were updated to match. The empty box follows the page direction so the Arabic examples read correctly.
+
 ### Parser test (rule-based, today = Tue 6 Oct 2026 12:45)
 | # | Input (messy) | Result | Pass |
 |---|---|---|---|

@@ -7,7 +7,7 @@
 **A bilingual (English + العربية) deadline untangler for college students in Oman.**
 Paste your WhatsApp group chat, Moodle notices and lecturer emails, and get back a calm, time-blocked week planned around your classes and prayer times. Rattib also tells you which deadline is *really* at risk.
 
-[**Open the live site →**](https://alsalti99.github.io/rattib/)
+[**Open the live site → rattib-om.netlify.app**](https://rattib-om.netlify.app)  ·  mirror: [alsalti99.github.io/rattib](https://alsalti99.github.io/rattib/)
 
 ![Single file](https://img.shields.io/badge/single%20file-index.html-2B59FF)
 ![No build step](https://img.shields.io/badge/build%20step-none-7A55F5)

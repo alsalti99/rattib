@@ -49,6 +49,8 @@ The team brought one concept: Rattib Untangle (the brief was sent with `/build`)
 
 - [19:17] fix → the Arabic hero line "ورتّب أسبوعك." had the shadda and hamza clipped at the top (gradient text only paints inside its box). Arabic `.l2` now has 0.4em top padding offset by a negative margin, so the marks show and the spacing is unchanged. Verified after reload.
 
+- [20:21] deploy → public GitHub repo **github.com/alsalti99/rattib** (README with preview image, topics). Published on GitHub Pages at **alsalti99.github.io/rattib** and on Netlify at **rattib-om.netlify.app** (the name `rattib` was taken). Netlify team protection was switched off for this site only, at the team's request. Both live URLs were verified in the browser: intro, Untangle, team photos, clean console. The repo excludes the local-only files (`serve.py`, `PITCH.md`, `.claude/`), and network addresses were removed from this log.
+
 ### Parser test (rule-based, today = Tue 6 Oct 2026 12:45)
 | # | Input (messy) | Result | Pass |
 |---|---|---|---|

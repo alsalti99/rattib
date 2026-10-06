@@ -16,11 +16,9 @@ Paste your WhatsApp group chat, Moodle notices and lecturer emails, and get back
 ![English + Arabic](https://img.shields.io/badge/language-English%20%2B%20%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-6BC8FF)
 ![Privacy](https://img.shields.io/badge/data-stays%20on%20your%20device-0B7F72)
 
-<a href="https://rattib-om.netlify.app/assets/preview.mp4"><img src="assets/video-thumb.jpg" alt="Watch the 30-second Rattib preview video" width="820"></a>
+<a href="https://rattib-om.netlify.app/assets/preview.mp4"><img src="assets/preview.gif" alt="30-second Rattib preview: paste the chaos, untangle it, see what's really at risk" width="820"></a>
 
-**▶ Watch the 30-second preview**
-
-<img src="assets/preview.jpg" alt="Rattib hero: the paste box on the left and the untangled Sunday–Thursday loom on the right" width="820">
+<sub>▶ Click the preview for the full video with sound</sub>
 
 </div>
 

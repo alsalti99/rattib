@@ -836,7 +836,7 @@ footer { padding-bottom: 40px; }
         <p data-i18n="how.sub">Rattib is a rule-based tool that runs entirely in your browser. It is not an AI model, so every result below can be explained.</p>
       </div>
       <figure class="demo-video hcard">
-        <video controls preload="metadata" playsinline poster="assets/preview-poster.jpg" aria-labelledby="vid-title">
+        <video controls muted loop playsinline preload="metadata" poster="assets/preview-poster.jpg" aria-labelledby="vid-title">
           <source src="assets/preview.mp4" type="video/mp4">
         </video>
         <figcaption><strong id="vid-title" data-i18n="vid.title">Rattib in 30 seconds</strong><span data-i18n="vid.cap">Paste the chaos, untangle it, and see which deadline is really at risk.</span></figcaption>
@@ -2727,6 +2727,21 @@ function syncSoundLabel() { $$('[data-sound-toggle]').forEach(b => b.setAttribut
 /* ==============================================================
    4 Motion (guarded): spotlight cards
    ============================================================== */
+// Preview video: browsers only allow muted autoplay, so it plays muted while on screen and pauses off screen.
+// If the visitor pauses it, it stays paused. The controls let them unmute. Reduced motion: no autoplay.
+function initDemoVideo() {
+  const v = $('.demo-video video');
+  if (!v || reduceMotion) return;
+  v.muted = true;
+  let auto = true;
+  let ours = false; // true while the pause comes from us, not the visitor
+  v.addEventListener('pause', () => { if (!ours) auto = false; ours = false; });
+  v.addEventListener('play', () => { auto = true; });
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && auto && v.paused) v.play().catch(() => {});
+    else if (!e.isIntersecting && !v.paused) { ours = true; v.pause(); }
+  }, { threshold: 0.35 }).observe(v);
+}
 function initSpotlight() {
   if (reduceMotion || !matchMedia('(hover: hover)').matches) return;
   document.addEventListener('pointermove', e => {
@@ -2953,6 +2968,7 @@ function init() {
   $('#add-class').addEventListener('click', () => { state.settings.classes.push({ day: 0, start: '10:00', end: '11:15', name: '' }); renderSetup(); const rows = $$('#class-rows .cls-row'); const last = rows[rows.length - 1]; if (last) last.querySelector('input').focus(); scheduleRender(); });
 
   initSpotlight();
+  initDemoVideo();
   initGate();
   // Keep "now" fresh: re-plan every 5 minutes so past slots drop off
   setInterval(() => { if (!document.hidden && !Hero.isPlaying() && !state.editing) renderAll(); }, 5 * 60000);

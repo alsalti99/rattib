@@ -18,7 +18,7 @@ Write down everything that's due, the way it comes to mind (or paste it from Wha
 
 <a href="https://rattib-om.netlify.app/assets/preview.mp4"><img src="assets/preview.gif" alt="30-second Rattib preview: get your deadlines out of your head, untangle them, see what's really at risk" width="820"></a>
 
-<sub>▶ Click the preview for the full video with sound</sub>
+<sub>▶ Click the preview for the full video</sub>
 
 </div>
 
